@@ -20,7 +20,7 @@ jobs:
         xmake-version: 2.9.9
         actions-cache-folder: '.xmake-cache'
     - name: Configure xmake
-      run: xmake f -p windows -a x64 -m debug
+      run: xmake f -p windows -a x64 -m debug -y
 
     - name: Test
       run: xmake test
