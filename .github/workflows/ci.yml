@@ -16,7 +16,9 @@ jobs:
 
     - name: Set up xmake
       uses: xmake-io/github-action-setup-xmake@v1
-
+      with:
+        xmake-version: 2.9.9
+        actions-cache-folder: '.xmake-cache'
     - name: Configure xmake
       run: xmake f -p windows -a x64 -m debug
 
