@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: Windows-latest
 
     steps:
     - name: Checkout code
@@ -17,5 +17,10 @@ jobs:
     - name: Set up xmake
       uses: xmake-io/github-action-setup-xmake@v1
 
+    - name: Configure xmake
+      run: xmake f -p windows -a x64 -m debug
+
     - name: Test
       run: xmake test
+
+    
