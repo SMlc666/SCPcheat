@@ -23,4 +23,10 @@ jobs:
     - name: Test
       run: xmake test
 
+    - name: Build
+      run: xmake
     
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+        name: cheat
+        path: build
