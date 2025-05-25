@@ -27,15 +27,14 @@ jobs:
 
     - name: Build
       run: xmake
-    
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: cheat
-        path: build
 
     - name: SonarQube Scan for C and C++
       uses: SonarSource/sonarqube-github-c-cpp@v2.1.0
       with:
         cache-binaries: true
-              
+      
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: cheat
+        path: build
