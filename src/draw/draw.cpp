@@ -3,7 +3,7 @@
 #include "include/kiero/kiero.h"
 void zr::setupDraw() {
   while (true) {
-    if (kiero::init(kiero::RenderType::D3D11)) {
+    if (kiero::init(kiero::RenderType::D3D11) == kiero::Status::Success) {
       setupImGui();
       break;
     }

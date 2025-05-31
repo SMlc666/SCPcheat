@@ -1,14 +1,19 @@
 #include "gui.hpp"
-#include "hook/hook.hpp"
+#include "draw/gui/font.hpp"
 #include "input/input.hpp"
 #include "kiero/kiero.h"
+#include "log/log.hpp"
+#include "safetyhook/easy.hpp"
+#include "safetyhook/inline_hook.hpp"
 #include "window/WindowManager.hpp"
 #include <d3d11.h>
 #include <imgui.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_impl_win32.h>
+#include <iostream>
+#include <safetyhook.hpp>
 
-zr::Hook Present11_hook;
+safetyhook::InlineHook Present11_hook;
 long __stdcall hkPresent11(IDXGISwapChain *pSwapChain, UINT SyncInterval,
                            UINT Flags) {
   static bool init = false;
@@ -22,12 +27,11 @@ long __stdcall hkPresent11(IDXGISwapChain *pSwapChain, UINT SyncInterval,
 
     ID3D11DeviceContext *context;
     device->GetImmediateContext(&context);
-
     zr::setupInput((HWND)desc.OutputWindow);
     ImGui::CreateContext();
     ImGui_ImplWin32_Init(desc.OutputWindow);
     ImGui_ImplDX11_Init(device, context);
-
+    zr::setupImGuiFont();
     init = true;
   }
 
@@ -43,5 +47,10 @@ long __stdcall hkPresent11(IDXGISwapChain *pSwapChain, UINT SyncInterval,
 }
 
 void zr::setupImGui() {
-  Present11_hook = zr::Hook((void *)kiero::getMethodsTable()[8], hkPresent11);
+  zr::LogInstance::getMainLogger().info("Present address:{:p}",
+                                        (void *)kiero::getMethodsTable()[8]);
+  zr::LogInstance::getMainLogger().flush();
+  Present11_hook =
+      safetyhook::create_inline(kiero::getMethodsTable()[8], hkPresent11);
+  zr::LogInstance::getMainLogger().info("Present hooked");
 }
