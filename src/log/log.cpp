@@ -10,10 +10,6 @@
 static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> loggers;
 static std::shared_ptr<spdlog::sinks::ringbuffer_sink<std::mutex>> sink =
     std::make_shared<spdlog::sinks::ringbuffer_sink<std::mutex>>(100);
-#ifdef LOG_TO_CONSOLE
-static std::shared_ptr<spdlog::sinks::stdout_sink_mt> console_sink =
-    std::make_shared<spdlog::sinks::stdout_sink_mt>();
-#endif
 
 namespace zr {
 
@@ -34,9 +30,6 @@ spdlog::logger &LogInstance::getOrCreateLogger(const std::string &name) {
         std::make_shared<spdlog::logger>(name);
     logger->sinks().clear();
     logger->sinks().push_back(sink);
-#ifdef LOG_TO_CONSOLE
-    logger->sinks().push_back(console_sink);
-#endif
     logger->set_level(spdlog::level::trace);
     logger->set_pattern("%Y-%m-%d %H:%M:%S.%e [%t] [%l] %v");
     loggers.emplace(name, logger);

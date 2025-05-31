@@ -38,12 +38,7 @@ void LogWindow::OnRender() {
   ImGui::Checkbox("Warn", &m_LevelFilters[3]);
   ImGui::SameLine();
   ImGui::Checkbox("Error", &m_LevelFilters[4]);
-  // 添加测试日志按钮
-  if (ImGui::Button("Test Log")) {
-    // 获取主日志记录器并记录测试日志
-    auto &logger = LogInstance::getMainLogger();
-    logger.info("This is a test log message from LogWindow");
-  }
+
   ImGui::SameLine();
   ImGui::Checkbox("Critical", &m_LevelFilters[5]);
 
@@ -58,26 +53,32 @@ void LogWindow::OnRender() {
     bool hasLevel = false;
     size_t firstBracket = log.find('[');
     if (firstBracket != std::string::npos) {
-        size_t secondBracket = log.find('[', firstBracket + 1);
-        if (secondBracket != std::string::npos) {
-            size_t levelStart = secondBracket;
-            size_t levelEnd = log.find(']', levelStart);
-            if (levelEnd != std::string::npos) {
-                levelStr = log.substr(levelStart + 1, levelEnd - levelStart - 1);
-                hasLevel = true;
-            }
+      size_t secondBracket = log.find('[', firstBracket + 1);
+      if (secondBracket != std::string::npos) {
+        size_t levelStart = secondBracket;
+        size_t levelEnd = log.find(']', levelStart);
+        if (levelEnd != std::string::npos) {
+          levelStr = log.substr(levelStart + 1, levelEnd - levelStart - 1);
+          hasLevel = true;
         }
+      }
     }
 
     if (hasLevel) {
       // 检查日志等级是否被选中 (适配spdlog缩写)
       bool showLog = false;
-      if (levelStr == "trace" || levelStr == "t") showLog = m_LevelFilters[0];
-      else if (levelStr == "debug" || levelStr == "d") showLog = m_LevelFilters[1];
-      else if (levelStr == "info" || levelStr == "i") showLog = m_LevelFilters[2];
-      else if (levelStr == "warn" || levelStr == "w") showLog = m_LevelFilters[3];
-      else if (levelStr == "error" || levelStr == "e") showLog = m_LevelFilters[4];
-      else if (levelStr == "critical" || levelStr == "c") showLog = m_LevelFilters[5];
+      if (levelStr == "trace" || levelStr == "t")
+        showLog = m_LevelFilters[0];
+      else if (levelStr == "debug" || levelStr == "d")
+        showLog = m_LevelFilters[1];
+      else if (levelStr == "info" || levelStr == "i")
+        showLog = m_LevelFilters[2];
+      else if (levelStr == "warn" || levelStr == "w")
+        showLog = m_LevelFilters[3];
+      else if (levelStr == "error" || levelStr == "e")
+        showLog = m_LevelFilters[4];
+      else if (levelStr == "critical" || levelStr == "c")
+        showLog = m_LevelFilters[5];
 
       // 应用关键词过滤
       if (showLog && !m_FilterText.empty()) {
