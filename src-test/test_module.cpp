@@ -1,6 +1,6 @@
 #include "module/ModuleManager.hpp"
 #include "module/ModuleRegistrar.hpp" // 包含注册宏头文件
-#include "module/module.hpp"
+#include "module/Module.hpp"
 #include <gtest/gtest.h>
 #include <string>
 #include <vector>
@@ -10,7 +10,8 @@ using namespace zr;
 // Mock Module for testing
 class MockModule : public Module {
 public:
-  MockModule(std::string_view name) : Module(name) {}
+  MockModule(std::string_view name, ModuleWindowType type = ModuleWindowType::NONE)
+      : Module(name, type) {}
 
   // Track method calls
   int enableCount = 0;
@@ -43,7 +44,8 @@ public:
   }
 
 private:
-  RegistryTestModule() : MockModule("RegistryTestModule") {}
+  RegistryTestModule()
+      : MockModule("RegistryTestModule", ModuleWindowType::NONE) {}
 };
 
 // 使用宏注册测试模块（传递函数调用结果）
@@ -51,14 +53,14 @@ REGISTER_MODULE(RegistryTestModule, RegistryTestModule::getInstance());
 
 // Module tests
 TEST(ModuleTest, InitialState) {
-  MockModule module("test_module");
+  MockModule module("test_module", ModuleWindowType::NONE);
   EXPECT_FALSE(module.isEnabled());
   EXPECT_FALSE(module.isLoaded());
   EXPECT_EQ(module.getName(), "test_module");
 }
 
 TEST(ModuleTest, LoadModule) {
-  MockModule module("test_module");
+  MockModule module("test_module", ModuleWindowType::NONE);
   auto result = module.loadModule();
   EXPECT_FALSE(result.has_value());
   EXPECT_TRUE(module.isLoaded());
@@ -66,7 +68,7 @@ TEST(ModuleTest, LoadModule) {
 }
 
 TEST(ModuleTest, EnableDisableModule) {
-  MockModule module("test_module");
+  MockModule module("test_module", ModuleWindowType::NONE);
   module.loadModule();
 
   auto enableResult = module.enableModule();
@@ -81,8 +83,16 @@ TEST(ModuleTest, EnableDisableModule) {
 }
 
 TEST(ModuleTest, EnableBeforeLoadFails) {
-  MockModule module("test_module");
+  MockModule module("test_module", ModuleWindowType::NONE);
   auto result = module.enableModule();
+  EXPECT_TRUE(result.has_value());
+  EXPECT_EQ(result.value(), "Module not loaded");
+  EXPECT_FALSE(module.isEnabled());
+}
+
+TEST(ModuleTest, DisableBeforeLoadFails) {
+  MockModule module("test_module", ModuleWindowType::NONE);
+  auto result = module.disableModule();
   EXPECT_TRUE(result.has_value());
   EXPECT_EQ(result.value(), "Module not loaded");
   EXPECT_FALSE(module.isEnabled());
@@ -97,19 +107,19 @@ TEST(ModuleManagerTest, SingletonInstance) {
 
 TEST(ModuleManagerTest, AddAndGetModule) {
   ModuleManager &manager = ModuleManager::getInstance();
-  MockModule *module = new MockModule("test_module");
+  MockModule *module = new MockModule("test_module", ModuleWindowType::NONE);
 
   // Add by explicit name
   EXPECT_TRUE(manager.addModule("test_module", module));
   EXPECT_EQ(manager.getModuleByName("test_module"), module);
 
   // Add duplicate should fail
-  EXPECT_FALSE(manager.addModule("test_module", new MockModule("duplicate")));
+  EXPECT_FALSE(manager.addModule("test_module", new MockModule("duplicate", ModuleWindowType::NONE)));
 }
 
 TEST(ModuleManagerTest, AddModuleAutoName) {
   ModuleManager &manager = ModuleManager::getInstance();
-  MockModule *module = new MockModule("auto_name_module");
+  MockModule *module = new MockModule("auto_name_module", ModuleWindowType::NONE);
 
   EXPECT_TRUE(manager.addModule(module));
   EXPECT_EQ(manager.getModuleByName("auto_name_module"), module);

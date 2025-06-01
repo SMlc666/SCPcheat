@@ -1,18 +1,13 @@
 #pragma once
-#include "IL2CPPResolver/Unity/Includes.hpp"
-#include <cstdint>
-#include <functional>
-
+#include "IL2CPPResolver/IL2CPP_Resolver.hpp"
+#include <eventpp/callbacklist.h>
 
 namespace zr {
 void setupU3DPlayerUpdate();
 
-// 回调函数类型定义
-using PlayerUpdateCallback = std::function<void(Unity::CGameObject *)>;
+// 使用eventpp回调列表类型
+using PlayerUpdateCallbackList = eventpp::CallbackList<void(IL2CPP::CClass *)>;
 
-// 添加回调，返回句柄
-uint64_t addPlayerUpdateCallback(PlayerUpdateCallback callback);
-
-// 移除回调
-void removePlayerUpdateCallback(uint64_t handle);
+// 直接暴露回调列表对象供外部使用
+extern PlayerUpdateCallbackList playerUpdateCallbacks;
 } // namespace zr

@@ -1,18 +1,28 @@
-#include "../../Includes.hpp"
+#include "Object.hpp"
+#include "IL2CPPResolver/API/ResolveCall.hpp"
+#include "IL2CPPResolver/IL2CPP_Resolver.hpp"
+#include "IL2CPPResolver/SystemTypeCache.hpp"
+#include "IL2CPPResolver/Unity/Defines.hpp"
 
-namespace Unity
-{
-	SObjectFunctions ObjectFunctions;
+Unity::ObjectFunctions_t Unity::m_ObjectFunctions;
+void Unity::CObject::Destroy(float fTimeDelay) {
+  reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void *, float)>(
+      m_ObjectFunctions.m_Destroy)(this, fTimeDelay);
+}
+Unity::System_String *Unity::CObject::GetName() {
+  return reinterpret_cast<System_String *(UNITY_CALLING_CONVENTION)(void *)>(
+      m_ObjectFunctions.m_GetName)(this);
+}
+void Unity::Object::Initialize() {
+  IL2CPP::SystemTypeCache::Initializer::Add(UNITY_OBJECT_CLASS);
 
-	namespace Object
-	{
-		void Initialize()
-		{
-			IL2CPP::SystemTypeCache::Initializer::Add(UNITY_OBJECT_CLASS);
-
-			ObjectFunctions.m_pDestroy				= IL2CPP::ResolveCall(UNITY_OBJECT_DESTROY);
-			ObjectFunctions.m_pFindObjectsOfType	= IL2CPP::ResolveCall(UNITY_OBJECT_FINDOBJECTSOFTYPE);
-			ObjectFunctions.m_pGetName				= IL2CPP::ResolveCall(UNITY_OBJECT_GETNAME);
-		}
-	}
+  m_ObjectFunctions.m_Destroy = IL2CPP::ResolveCall(UNITY_OBJECT_DESTROY);
+  m_ObjectFunctions.m_FindObjectsOfType =
+      IL2CPP::ResolveCall(UNITY_OBJECT_FINDOBJECTSOFTYPE);
+  m_ObjectFunctions.m_GetName = IL2CPP::ResolveCall(UNITY_OBJECT_GETNAME);
+}
+static Unity::il2cppObject *Unity::Object::New(il2cppClass *m_pClass) {
+  return reinterpret_cast<Unity::il2cppObject *(
+      UNITY_CALLING_CONVENTION)(void *)>(IL2CPP::Functions.m_pObjectNew)(
+      m_pClass);
 }

@@ -1,3 +1,4 @@
-#include "Includes.hpp"
+#include "Data.hpp"
 
-namespace IL2CPP { SData Data; }
+IL2CPP::Functions_t IL2CPP::Functions;
+IL2CPP::Globals_t IL2CPP::Globals;

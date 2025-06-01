@@ -1,26 +1,18 @@
 #pragma once
 
-namespace Unity
-{
-	struct SLayerMaskFunctions
-	{
-		void* m_pLayerToName = nullptr;
-		void* m_pNameToLayer = nullptr;
-	};
-	extern SLayerMaskFunctions LayerMaskFunctions;
+#include "IL2CPPResolver/Unity/Structures/System_String.hpp"
+namespace Unity {
+struct LayerMaskFunctions_t {
+  void *m_LayerToName = nullptr;
+  void *m_NameToLayer = nullptr;
+};
+extern LayerMaskFunctions_t m_LayerMaskFunctions;
 
-	namespace LayerMask
-	{
-		void Initialize();
+namespace LayerMask {
+void Initialize();
 
-		static System_String* LayerToName(unsigned int m_uLayer)
-		{
-			return reinterpret_cast<System_String*(UNITY_CALLING_CONVENTION)(unsigned int)>(LayerMaskFunctions.m_pLayerToName)(m_uLayer);
-		}
+System_String *LayerToName(unsigned int m_uLayer);
 
-		static unsigned int NameToLayer(const char* m_pName)
-		{
-			return reinterpret_cast<unsigned int(UNITY_CALLING_CONVENTION)(void*)>(LayerMaskFunctions.m_pNameToLayer)(IL2CPP::String::New(m_pName));
-		}
-	}
-}
+uint32_t NameToLayer(const char *m_pName);
+} // namespace LayerMask
+} // namespace Unity

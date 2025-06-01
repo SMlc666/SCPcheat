@@ -1,4 +1,5 @@
 #include "module.hpp"
+#include "log/log.hpp"
 #include <cstddef>
 #include <optional>
 #include <string>
@@ -29,4 +30,21 @@ std::optional<std::string> zr::Module::enableModule() {
   }
   misEnabled = true;
   return enable();
+}
+std::optional<std::string> zr::Module::drawGUIModule() {
+  if (!misLoaded) {
+    return "Module not loaded";
+  }
+  return drawGUI();
+}
+std::optional<std::string>
+zr::Module::fromJsonModule(const nlohmann::json &json) {
+  return fromJson(json);
+}
+std::optional<std::string>
+zr::Module::toJsonModule(nlohmann::json &json) const {
+  return toJson(json);
+}
+spdlog::logger &zr::Module::getLogger() const {
+  return zr::LogInstance::getOrCreateLogger(mModuleName);
 }

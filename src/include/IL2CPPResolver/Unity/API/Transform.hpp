@@ -1,104 +1,60 @@
 #pragma once
 
-namespace Unity
-{
-	struct STransformFunctions
-	{
-		void* m_pGetParent = nullptr;
-		void* m_pLookAt = nullptr;
-		void* m_pGetRoot = nullptr;
-		void* m_pGetChild = nullptr;
-		void* m_pGetChildCount = nullptr;
-		void* m_pGetPosition = nullptr;
-		void* m_pGetRotation = nullptr;
-		void* m_pGetLocalPosition = nullptr;
-		void* m_pGetLocalScale = nullptr;
-		void* m_pSetPosition = nullptr;
-		void* m_pSetRotation = nullptr;
-		void* m_pSetLocalPosition = nullptr;
-		void* m_pSetLocalScale = nullptr;
-	};
-	extern STransformFunctions TransformFunctions;
+#include "IL2CPPResolver/API/Class.hpp"
 
-	class CTransform : public IL2CPP::CClass
-	{
-	public:
-		CTransform* GetParent()
-		{
-			return reinterpret_cast<CTransform*(UNITY_CALLING_CONVENTION)(void*)>(TransformFunctions.m_pGetParent)(this);
-		}
+#include "IL2CPPResolver/Unity/Structures/Engine.hpp"
 
-		CTransform* LookAt(CTransform look, Unity::Vector3 pos)
-		{
-			return reinterpret_cast<CTransform * (UNITY_CALLING_CONVENTION)(void*)>(TransformFunctions.m_pGetParent)(this);
-		}
+namespace Unity {
+struct TransformFunctions_t {
+  void *m_GetParent = nullptr;
+  void *m_GetRoot = nullptr;
+  void *m_GetChild = nullptr;
+  void *m_GetChildCount = nullptr;
+  void *m_FindChild = nullptr;
+  void *m_GetPosition = nullptr;
+  void *m_GetRotation = nullptr;
+  void *m_GetLocalPosition = nullptr;
+  void *m_GetLocalScale = nullptr;
+  void *m_SetPosition = nullptr;
+  void *m_SetRotation = nullptr;
+  void *m_SetLocalPosition = nullptr;
+  void *m_SetLocalScale = nullptr;
+};
+extern TransformFunctions_t m_TransformFunctions;
 
-		CTransform* GetRoot()
-		{
-			return reinterpret_cast<CTransform*(UNITY_CALLING_CONVENTION)(void*)>(TransformFunctions.m_pGetRoot)(this);
-		}
+class CTransform : public IL2CPP::CClass {
+public:
+  CTransform *GetParent();
 
-		CTransform* GetChild(int m_iIndex)
-		{
-			return reinterpret_cast<CTransform*(UNITY_CALLING_CONVENTION)(void*, int)>(TransformFunctions.m_pGetChild)(this, m_iIndex);
-		}
+  CTransform *GetRoot();
 
-		int GetChildCount()
-		{
-			return reinterpret_cast<int(UNITY_CALLING_CONVENTION)(void*)>(TransformFunctions.m_pGetChildCount)(this);
-		}
+  CTransform *GetChild(int m_iIndex);
 
-		Vector3 GetPosition()
-		{
-			Vector3 vRet;
-			reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void*, Vector3&)>(TransformFunctions.m_pGetPosition)(this, vRet);
-			return vRet;
-		}
+  int GetChildCount();
 
-		Quaternion GetRotation()
-		{
-			Quaternion m_qRet;
-			reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void*, Quaternion&)>(TransformFunctions.m_pGetRotation)(this, m_qRet);
-			return m_qRet;
-		}
+  CTransform *FindChild(const char *path, bool isActiveOnly);
 
-		Vector3 GetLocalPosition()
-		{
-			Vector3 vRet;
-			reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void*, Vector3&)>(TransformFunctions.m_pGetLocalPosition)(this, vRet);
-			return vRet;
-		}
+  // e.g CGameObject->GetTransform()->FindChild("child1/child2/child3");
+  CTransform *FindChild(const char *path);
 
-		Vector3 GetLocalScale()
-		{
-			Vector3 vRet;
-			reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void*, Vector3&)>(TransformFunctions.m_pGetLocalScale)(this, vRet);
-			return vRet;
-		}
+  Vector3 GetPosition();
 
-		void SetPosition(Vector3 m_vVector)
-		{
-			reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void*, Vector3)>(TransformFunctions.m_pSetPosition)(this, m_vVector);
-		}
+  Quaternion GetRotation();
 
-		void SetRotation(Quaternion m_qQuat)
-		{
-			reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void*, Quaternion)>(TransformFunctions.m_pSetRotation)(this, m_qQuat);
-		}
+  Vector3 GetLocalPosition();
 
-		void SetLocalPosition(Vector3 m_vVector)
-		{
-			reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void*, Vector3)>(TransformFunctions.m_pSetLocalPosition)(this, m_vVector);
-		}
+  Vector3 GetLocalScale();
 
-		void SetLocalScale(Vector3 m_vVector)
-		{
-			reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void*, Vector3)>(TransformFunctions.m_pSetLocalScale)(this, m_vVector);
-		}
-	};
+  void SetPosition(Vector3 m_vVector);
 
-	namespace Transform
-	{
-		void Initialize();
-	}
-}
+  void SetRotation(Quaternion m_qQuat);
+
+  void SetLocalPosition(Vector3 m_vVector);
+
+  void SetLocalScale(Vector3 m_vVector);
+};
+
+namespace Transform {
+void Initialize();
+} // namespace Transform
+} // namespace Unity

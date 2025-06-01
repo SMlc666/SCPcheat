@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IL2CPPResolver/Unity/Structures/il2cpp.hpp"
 namespace Unity
 {
 	template<typename T>

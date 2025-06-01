@@ -1,44 +1,29 @@
 #pragma once
+#include "IL2CPPResolver/API/Class.hpp"
 
-namespace Unity
-{
-	struct SRigidbodyFunctions
-	{
-		void* m_pGetDetectCollisions = nullptr;
-		void* m_pGetVelocity = nullptr;
-		void* m_pSetDetectCollisions = nullptr;
-		void* m_pSetVelocity = nullptr;
-	};
-	extern SRigidbodyFunctions RigidbodyFunctions;
+#include "IL2CPPResolver/Unity/Structures/Engine.hpp"
 
-	class CRigidbody : public IL2CPP::CClass
-	{
-	public:
-		bool GetDetectCollisions()
-		{
-			return reinterpret_cast<bool(UNITY_CALLING_CONVENTION)(void*)>(RigidbodyFunctions.m_pGetDetectCollisions)(this);
-		}
+namespace Unity {
+struct RigidbodyFunctions_t {
+  void *m_GetDetectCollisions = nullptr;
+  void *m_GetVelocity = nullptr;
+  void *m_SetDetectCollisions = nullptr;
+  void *m_SetVelocity = nullptr;
+};
+extern RigidbodyFunctions_t m_RigidbodyFunctions;
 
-		void SetDetectCollisions(bool m_bDetect)
-		{
-			reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void*, bool)>(RigidbodyFunctions.m_pSetDetectCollisions)(this, m_bDetect);
-		}
+class CRigidbody : public IL2CPP::CClass {
+public:
+  bool GetDetectCollisions();
 
-		Vector3 GetVelocity()
-		{
-			Vector3 vRet;
-			reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void*, Vector3&)>(RigidbodyFunctions.m_pGetVelocity)(this, vRet);
-			return vRet;
-		}
+  void SetDetectCollisions(bool m_bDetect);
 
-		void SetVelocity(Vector3 m_vVector)
-		{
-			reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void*, Vector3)>(RigidbodyFunctions.m_pSetVelocity)(this, m_vVector);
-		}
-	};
+  Vector3 GetVelocity();
 
-	namespace RigidBody
-	{
-		void Initialize();
-	}
-}
+  void SetVelocity(Vector3 m_vVector);
+};
+
+namespace RigidBody {
+void Initialize();
+} // namespace RigidBody
+} // namespace Unity

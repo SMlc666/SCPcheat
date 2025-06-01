@@ -1,27 +1,16 @@
 #pragma once
 
-namespace Unity
-{
-	struct System_String : il2cppObject
-	{
-		int m_iLength;
-		wchar_t m_wString[1024];
+#include "IL2CPPResolver/Unity/Structures/il2cpp.hpp"
+#include <Windows.h>
+#include <string>
 
-		void Clear()
-		{
-			if (!this) return;
+namespace Unity {
+struct System_String : il2cppObject {
+  int m_iLength;
+  wchar_t m_wString[1024];
 
-			memset(m_wString, 0, static_cast<size_t>(m_iLength) * 2);
-			m_iLength = 0;
-		}
+  void Clear();
 
-		std::string ToString()
-		{
-			if (!this) return "";
-
-			std::string sRet(static_cast<size_t>(m_iLength) + 1, '\0');
-			WideCharToMultiByte(CP_UTF8, 0, m_wString, m_iLength, &sRet[0], m_iLength, 0, 0);
-			return sRet;
-		}
-	};
-}
+  std::string ToString();
+};
+} // namespace Unity

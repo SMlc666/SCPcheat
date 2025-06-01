@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 namespace Unity
 {
 	struct il2cppImage
@@ -65,6 +66,13 @@ namespace Unity
 		void* m_pMonitor = nullptr;
 	};
 
+#ifdef UNITY_VERSION_2022_3_8F1
+	struct il2cppType
+	{
+		void* data;
+		unsigned int bits;
+	};
+#else
 	struct il2cppType
 	{
 		union
@@ -82,6 +90,7 @@ namespace Unity
 		unsigned int m_uByref : 1;
 		unsigned int m_uPinned : 1;
 	};
+#endif
 
 	struct il2cppFieldInfo
 	{
@@ -104,11 +113,18 @@ namespace Unity
 	struct il2cppMethodInfo
 	{
 		void* m_pMethodPointer;
+#ifdef UNITY_VERSION_2022_3_8F1
+		void* m_pVirtualMethodPointer;
+#endif
 		void* m_pInvokerMethod;
 		const char* m_pName;
 		il2cppClass* m_pClass;
 		il2cppType* m_pReturnType;
+#ifdef UNITY_VERSION_2022_3_8F1
+		il2cppType** m_pParameters;
+#else
 		il2cppParameterInfo* m_pParameters;
+#endif
 
 		union
 		{
