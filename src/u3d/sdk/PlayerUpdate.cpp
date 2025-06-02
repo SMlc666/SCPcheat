@@ -8,7 +8,7 @@ namespace zr {
 // 定义回调列表对象
 PlayerUpdateCallbackList playerUpdateCallbacks;
 
-static void PlayerUpdate_Proxy(IL2CPP::CClass *m_pGameObject) {
+static void PlayerUpdate_Proxy(Player *m_pGameObject) {
   // 调用原始函数
   Player_Update_hook.call(m_pGameObject);
 

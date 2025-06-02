@@ -14,6 +14,9 @@
 #include <safetyhook.hpp>
 
 safetyhook::InlineHook Present11_hook;
+namespace zr {
+eventpp::CallbackList<void()> ImGuiCallback;
+}
 long __stdcall hkPresent11(IDXGISwapChain *pSwapChain, UINT SyncInterval,
                            UINT Flags) {
   static bool init = false;
@@ -38,7 +41,9 @@ long __stdcall hkPresent11(IDXGISwapChain *pSwapChain, UINT SyncInterval,
   ImGui_ImplDX11_NewFrame();
   ImGui_ImplWin32_NewFrame();
   ImGui::NewFrame();
+
   zr::WindowManager::RenderAll();
+  zr::ImGuiCallback();
   ImGui::EndFrame();
   ImGui::Render();
   ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
