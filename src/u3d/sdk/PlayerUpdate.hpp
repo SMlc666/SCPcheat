@@ -7,8 +7,10 @@ namespace zr {
 void setupU3DPlayerUpdate();
 
 // 使用eventpp回调列表类型
-using PlayerUpdateCallbackList = eventpp::CallbackList<void(Player*)>;
+using PlayerUpdateCallbackList = eventpp::CallbackList<void(Player *)>;
 
 // 直接暴露回调列表对象供外部使用
 extern PlayerUpdateCallbackList playerUpdateCallbacks;
+
+extern std::vector<std::function<void(Player *)>> PlayerUpdateOnceCallbackList;
 } // namespace zr

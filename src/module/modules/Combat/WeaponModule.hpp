@@ -16,6 +16,7 @@ public:
   float recoil = 0;
   float spread = 0;
   float size_comp = 1;
+  int16_t damage = 100;
   // 模块生命周期方法
   std::optional<std::string> load() override;
   std::optional<std::string> enable() override;

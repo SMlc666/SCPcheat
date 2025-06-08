@@ -1,15 +1,23 @@
 #include "System_String.hpp"
-void Unity::System_String::Clear() {
+#include "utf8/utf8.h"
+#include <iterator>
 
+static std::string Utf16ToUtf8(wchar_t *utf16String, size_t length) {
+  std::string utf8String{};
+  utf8String.reserve(length);
+  utf8::unchecked::utf16to8(utf16String, utf16String + length,
+                            std::back_inserter(utf8String));
+  return utf8String;
+}
+
+void Unity::System_String::Clear() {
 
   memset(m_wString, 0, static_cast<size_t>(m_iLength) * 2);
   m_iLength = 0;
 }
 std::string Unity::System_String::ToString() {
 
-
-  std::string sRet(static_cast<size_t>(m_iLength + 1) * 4, '\0');
-  WideCharToMultiByte(CP_UTF8, 0, m_wString, m_iLength, &sRet[0],
-                      static_cast<int>(sRet.size()), 0, 0);
-  return sRet;
+  if (!m_iLength)
+    return {};
+  return Utf16ToUtf8(m_wString, m_iLength);
 }

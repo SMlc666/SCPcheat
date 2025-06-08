@@ -1,8 +1,10 @@
 #include "ModuleSetup.hpp"
+#include "config/config.hpp"
 #include "module/ModuleManager.hpp"
 
 void zr::setupModules() {
   zr::ModuleManager::getInstance().registerModulesFromRegistry();
+  zr::setupConfig();
   ModuleManager::getInstance().forEachModule([](Module *module) -> bool {
     std::optional<std::string> result = module->loadModule();
     if (result.has_value()) {

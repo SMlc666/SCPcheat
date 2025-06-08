@@ -2,12 +2,16 @@
 
 #include "IL2CPPResolver/Unity/API/Component.hpp"
 #include "IL2CPPResolver/Unity/Structures/Engine.hpp"
+#include "u3d/sdk/Control/FirstPersonController.hpp"
+#include "u3d/sdk/Control/PositionControllerAC.hpp"
+#include "u3d/sdk/Player/PlayerClass.hpp"
 #include <cstdint>
 namespace zr {
 class Player : public Unity::CComponent {
 public:
   Player() = delete;
-
+  PlayerClass *getPlayerClass();
+  static std::vector<Player *> getAllPlayers();
   void setSpeed(float walkSpeed, float runSpeed);
   void setJumpPower(float power);
   void teleport(Unity::Vector3 vec);
@@ -18,5 +22,7 @@ public:
   uint32_t getMaxHealth();
   bool isInit();
   bool isAdmin();
+  FirstPersonController *getFirstPersonController();
+  PositionControllerAC *getPositionControllerAC();
 };
 } // namespace zr

@@ -18,24 +18,18 @@ ConfigWindow::ConfigWindow() : Window("Config", true) {}
 void ConfigWindow::OnRender() {
   static std::filesystem::path configFilePath =
       ConfigHelper::getConfigFilePath();
-  static std::string configFileContent;
-
+  std::string configFileContent;
+  std::ifstream ifs(configFilePath);
+  if (ifs.is_open()) {
+    std::stringstream buffer;
+    buffer << ifs.rdbuf();
+    configFileContent = buffer.str();
+    ifs.close();
+  }
   if (ImGui::Button("Load Config")) {
     ConfigHelper::loadConfigFromFile(configFilePath);
-    // 读取文件内容
-    std::ifstream ifs(configFilePath);
-    if (ifs.is_open()) {
-      std::stringstream buffer;
-      buffer << ifs.rdbuf();
-      configFileContent = buffer.str();
-      ifs.close();
-      LogInstance::getMainLogger().info("Config loaded from {}",
-                                        configFilePath.string());
-    } else {
-      LogInstance::getMainLogger().error("Failed to open config file: {}",
-                                         configFilePath.string());
-      configFileContent = "";
-    }
+    LogInstance::getMainLogger().info("Config loaded from {}",
+                                      configFilePath.string());
   }
 
   ImGui::SameLine();

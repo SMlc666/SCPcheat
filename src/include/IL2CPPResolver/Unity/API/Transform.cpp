@@ -4,6 +4,7 @@
 #include "IL2CPPResolver/IL2CPP_Resolver.hpp"
 #include "IL2CPPResolver/SystemTypeCache.hpp"
 #include "IL2CPPResolver/Unity/Defines.hpp"
+#include "IL2CPPResolver/Unity/Structures/Engine.hpp"
 
 Unity::TransformFunctions_t Unity::m_TransformFunctions;
 Unity::CTransform *Unity::CTransform::GetParent() {
@@ -37,8 +38,7 @@ Unity::CTransform *Unity::CTransform::FindChild(const char *path) {
 }
 Unity::Vector3 Unity::CTransform::GetPosition() {
   Vector3 vRet;
-  reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void *, Vector3 &)>(
-      m_TransformFunctions.m_GetPosition)(this, vRet);
+  vRet = CallMethod<Vector3>("get_position");
   return vRet;
 }
 Unity::Quaternion Unity::CTransform::GetRotation() {

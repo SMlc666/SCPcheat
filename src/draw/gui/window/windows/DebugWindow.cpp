@@ -35,10 +35,10 @@ void DebugWindow::OnRender() {
       Unity::CTransform *transform = localplayer->GetTransform();
       LogInstance::getMainLogger().info("Transform : {:p}",
                                         reinterpret_cast<void *>(transform));
-      LogInstance::getMainLogger().info("name : {}",
-                                        localplayer->getAccountName());
+      LogInstance::getMainLogger().info(
+          "name : {}", localplayer->getPlayerClass()->getName());
 
-      Unity::Vector3 vec3 = transform->GetLocalPosition();
+      Unity::Vector3 vec3 = transform->GetPosition();
       LogInstance::getMainLogger().info(" x y z:", vec3.x, vec3.y, vec3.z);
       IL2CPP::Thread::Detach(thisThread);
     }
