@@ -1,6 +1,6 @@
 #include "AutoJumpModule.hpp"
 #include "module/ModuleRegistrar.hpp"
-#include "u3d/sdk/Player/LocalPlayer.hpp"
+#include "u3d/sdk/Actor/Player/LocalPlayer.hpp"
 
 namespace zr {
 AutoJumpModule *AutoJumpModule::getInstance() {

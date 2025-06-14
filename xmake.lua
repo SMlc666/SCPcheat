@@ -6,18 +6,22 @@ add_requires("gtest")
 add_requires("eventpp 0.1.3")
 add_requires("nlohmann_json 3.11.3")
 add_requires("fmt")
-
+add_requires("microsoft-gsl 4.2.0")
 
 target("scpCheat")
     set_kind("shared")
     set_languages("c++23")
-    add_packages("safetyhook", "imgui", "spdlog","eventpp","nlohmann_json","fmt")
+    add_packages("safetyhook", "imgui", "spdlog","eventpp","nlohmann_json","fmt","microsoft-gsl")
     add_files("src/**.cpp|test/test_*.cpp")
     add_includedirs("src","src/include")
     add_links("user32")
     add_defines("UNITY_VERSION_2022_3_8F1")
     if is_mode("release") then
         remove_files("src/draw/gui/window/windows/DebugWindow.cpp")
+        remove_files("src/CrashDump.cpp")
+    elseif is_mode("debug") then 
+        add_links("DbgHelp")
+        add_defines("DEBUG")
     end
 
 target("test")
@@ -30,5 +34,7 @@ target("test")
     add_files("src/utils/*.cpp")
     add_files("src/config/config.cpp")
     add_packages("gtest", "spdlog","nlohmann_json")
+    add_links("user32")
     add_includedirs("src", "src/include")
     add_tests("default")
+    

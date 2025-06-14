@@ -2,10 +2,11 @@
 
 #include "IL2CPPResolver/Unity/API/Component.hpp"
 #include "IL2CPPResolver/Unity/Structures/Engine.hpp"
+#include "u3d/sdk/Actor/Player/PlayerClass.hpp"
 #include "u3d/sdk/Control/FirstPersonController.hpp"
 #include "u3d/sdk/Control/PositionControllerAC.hpp"
-#include "u3d/sdk/Player/PlayerClass.hpp"
 #include <cstdint>
+
 namespace zr {
 class Player : public Unity::CComponent {
 public:

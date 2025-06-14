@@ -20,7 +20,6 @@ void Weapon_UpdateProxy(IL2CPP::CClass *Weapon) {
     Weapon->SetMemberValue("recoil", WeaponModule::getInstance()->recoil);
     Weapon->SetMemberValue("spread", WeaponModule::getInstance()->spread);
     Weapon->SetMemberValue("size_comp", WeaponModule::getInstance()->size_comp);
-    Weapon->SetMemberValue(0xB0, WeaponModule::getInstance()->damage);
   }
   Weapon_UpdateHook.call(Weapon);
 }
@@ -59,10 +58,6 @@ std::optional<std::string> WeaponModule::drawGUI() {
   ImGui::DragFloat("recoil", &recoil, 0.01, 0.01, 5);
   ImGui::DragFloat("spread", &spread, 0.01, 0.01, 5);
   ImGui::DragFloat("size_comp", &size_comp, 0.1, 0.01, 10);
-  int damage_buf = static_cast<int>(damage);
-  ImGui::DragInt("damage", &damage_buf, 0.1, 0, 1000);
-  damage = static_cast<int16_t>(damage_buf);
-  // TODO: 绘制GUI界面
   return std::nullopt;
 }
 std::optional<std::string> WeaponModule::toJson(nlohmann::json &json) const {
@@ -70,7 +65,6 @@ std::optional<std::string> WeaponModule::toJson(nlohmann::json &json) const {
   json["recoil"] = recoil;
   json["spread"] = spread;
   json["size_comp"] = size_comp;
-  json["damage"] = damage;
   return std::nullopt;
 }
 std::optional<std::string> WeaponModule::fromJson(const nlohmann::json &json) {
@@ -93,11 +87,6 @@ std::optional<std::string> WeaponModule::fromJson(const nlohmann::json &json) {
     size_comp = json["size_comp"].get<float>();
   } else {
     return "Missing 'size_comp' in JSON";
-  }
-  if (json.contains("damage") && json["damage"].is_number_integer()) {
-    damage = static_cast<int16_t>(json["damage"].get<int>());
-  } else {
-    return "Missing 'damage' in JSON";
   }
   return std::nullopt;
 }

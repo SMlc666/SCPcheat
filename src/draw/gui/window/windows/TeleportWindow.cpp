@@ -5,12 +5,14 @@
 #include "IL2CPPResolver/Unity/Structures/Engine.hpp"
 #include "draw/gui/window/WindowManager.hpp"
 #include "imgui.h"
+#include "log/log.hpp"
+#include "u3d/sdk/Actor/Player/LocalPlayer.hpp"
+#include "u3d/sdk/Actor/Player/Player.hpp"
 #include "u3d/sdk/Control/PositionControllerAC.hpp"
-#include "u3d/sdk/Player/LocalPlayer.hpp"
-#include "u3d/sdk/Player/Player.hpp"
 #include "u3d/sdk/PlayerUpdate.hpp"
 #include "u3d/sdk/Rooms/Rooms.hpp"
 #include <fmt/format.h>
+
 namespace zr {
 TeleportWindow *TeleportWindow::GetInstance() {
   static TeleportWindow instance;
@@ -35,7 +37,11 @@ void TeleportWindow::OnRender() {
           PlayerUpdateOnceCallbackList.push_back([=](Player *player) {
             auto localplayer = LocalPlayer::getInstance();
             if (localplayer) {
+              LogInstance::getMainLogger().info(fmt::format(
+                  "Teleporting to room: {} at position: ({}, {}, {})", roomName,
+                  position.x, position.y, position.z));
               localplayer->teleport(position);
+              localplayer->teleportClient(position);
             }
           });
         }
@@ -48,21 +54,26 @@ void TeleportWindow::OnRender() {
   if (ImGui::TreeNode("Players")) {
     auto players = Player::getAllPlayers();
     if (!players.empty()) {
+      int i = 0;
       for (const auto player : players) {
         std::string className = player->getClassName();
-        PositionControllerAC *controller = player->getPositionControllerAC();
-        if (controller == nullptr) {
+        Unity::CTransform *transform = player->GetTransform();
+        if (transform == nullptr) {
           continue;
         }
-        Unity::Vector3 position = controller->getPrevPosition();
+        Unity::Vector3 position = transform->GetPosition();
         position.y += 1.0f;
-        if (ImGui::Button(fmt::format("class :{} pos : ({}, {}, {})", className,
-                                      position.x, position.y, position.z)
-                              .c_str())) {
+        i += 1;
+        if (ImGui::Button(
+                fmt::format("class :{} index: {}", className, i).c_str())) {
           PlayerUpdateOnceCallbackList.push_back([=](Player *player) {
             auto localplayer = LocalPlayer::getInstance();
             if (localplayer) {
+              LogInstance::getMainLogger().info(fmt::format(
+                  "Teleporting to player: {} at position: ({}, {}, {})",
+                  className, position.x, position.y, position.z));
               localplayer->teleport(position);
+              localplayer->teleportClient(position);
             }
           });
         }
@@ -79,7 +90,11 @@ void TeleportWindow::OnRender() {
       PlayerUpdateOnceCallbackList.push_back([=](Player *player) {
         auto localplayer = LocalPlayer::getInstance();
         if (localplayer) {
+          LogInstance::getMainLogger().info(fmt::format(
+              "Teleporting to custom position: ({}, {}, {})", customPosition.x,
+              customPosition.y, customPosition.z));
           localplayer->teleport(customPosition);
+          localplayer->teleportClient(customPosition);
         }
       });
     }

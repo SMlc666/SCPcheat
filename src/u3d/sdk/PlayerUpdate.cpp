@@ -1,6 +1,7 @@
 #include "PlayerUpdate.hpp"
 #include "log/log.hpp"
 #include "safetyhook.hpp"
+#include "u3d/sdk/Actor/Player/LocalPlayer.hpp"
 
 safetyhook::InlineHook Player_Update_hook;
 
@@ -11,18 +12,18 @@ std::vector<std::function<void(Player *)>> PlayerUpdateOnceCallbackList;
 static void PlayerUpdate_Proxy(Player *m_pGameObject) {
   // 调用原始函数
   Player_Update_hook.call(m_pGameObject);
+  if (m_pGameObject == LocalPlayer::getInstance()) {
+    // 执行所有注册的回调
+    playerUpdateCallbacks(m_pGameObject);
 
-  // 执行所有注册的回调
-  playerUpdateCallbacks(m_pGameObject);
-
-  // 执行一次性回调并移除它们
-  for (auto it = PlayerUpdateOnceCallbackList.begin();
-       it != PlayerUpdateOnceCallbackList.end();) {
-    (*it)(m_pGameObject);
-    it = PlayerUpdateOnceCallbackList.erase(it);
+    // 执行一次性回调并移除它们
+    for (auto it = PlayerUpdateOnceCallbackList.begin();
+         it != PlayerUpdateOnceCallbackList.end();) {
+      (*it)(m_pGameObject);
+      it = PlayerUpdateOnceCallbackList.erase(it);
+    }
   }
 }
-
 void setupU3DPlayerUpdate() {
   void *Player_UpdateAddr =
       IL2CPP::Class::Utils::GetMethodPointer("Player", "Update", 0);

@@ -43,8 +43,7 @@ Unity::Vector3 Unity::CTransform::GetPosition() {
 }
 Unity::Quaternion Unity::CTransform::GetRotation() {
   Quaternion m_qRet;
-  reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void *, Quaternion &)>(
-      m_TransformFunctions.m_GetRotation)(this, m_qRet);
+  m_qRet = CallMethod<Quaternion>("get_rotation");
   return m_qRet;
 }
 void Unity::Transform::Initialize() {

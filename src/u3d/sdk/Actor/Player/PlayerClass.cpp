@@ -1,6 +1,6 @@
 #include "PlayerClass.hpp"
 #include "IL2CPPResolver/Unity/Structures/System_String.hpp"
-#include "u3d/sdk/Player/Player.hpp"
+#include "u3d/sdk/Actor/Player/Player.hpp"
 
 namespace zr {
 Player *PlayerClass::getPlayer() { return GetMemberValue<Player *>("player"); }

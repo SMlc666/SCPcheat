@@ -1,6 +1,6 @@
 #pragma once
 #include "IL2CPPResolver/API/Class.hpp"
-#include "u3d/sdk/Player/Player.hpp"
+#include "u3d/sdk/Actor/Player/Player.hpp"
 #include <eventpp/callbacklist.h>
 
 namespace zr {

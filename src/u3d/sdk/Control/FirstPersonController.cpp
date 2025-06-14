@@ -17,4 +17,7 @@ void FirstPersonController::setJumping(bool jumping) {
 void FirstPersonController::setWalking(bool walking) {
   SetMemberValue("m_IsWalking", walking);
 }
+MouseLook *FirstPersonController::getMouseLook() {
+  return GetMemberValue<MouseLook *>("m_MouseLook");
+}
 } // namespace zr

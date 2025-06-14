@@ -2,7 +2,7 @@
 #include "eventpp/callbacklist.h"
 #include "imgui.h"
 #include "module/ModuleRegistrar.hpp"
-#include "u3d/sdk/Player/Player.hpp"
+#include "u3d/sdk/Actor/Player/Player.hpp"
 #include <optional>
 
 using namespace zr;

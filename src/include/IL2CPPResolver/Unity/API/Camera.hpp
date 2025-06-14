@@ -24,7 +24,7 @@ public:
 
   void SetFieldOfView(float m_fValue);
 
-  void WorldToScreen(Vector3 &m_vWorld, Vector3 &m_vScreen, int m_iEye = 2);
+  bool WorldToScreen(Unity::Vector3 world, Vector2 &screen);
 };
 
 namespace Camera {

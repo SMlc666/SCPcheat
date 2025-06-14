@@ -1,4 +1,5 @@
 #include "GameObject.hpp"
+#include "IL2CPPResolver/API/Class.hpp"
 #include "IL2CPPResolver/API/ResolveCall.hpp"
 #include "IL2CPPResolver/API/String.hpp"
 #include "IL2CPPResolver/IL2CPP_Resolver.hpp"
@@ -89,7 +90,6 @@ unsigned int Unity::CGameObject::GetLayer() {
 }
 void Unity::GameObject::Initialize() {
   IL2CPP::SystemTypeCache::Initializer::Add(UNITY_GAMEOBJECT_CLASS);
-
   m_GameObjectFunctions.m_AddComponent =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_ADDCOMPONENT);
   m_GameObjectFunctions.m_CreatePrimitive =
@@ -102,7 +102,8 @@ void Unity::GameObject::Initialize() {
   m_GameObjectFunctions.m_GetComponents =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_GETCOMPONENTS);
   m_GameObjectFunctions.m_GetComponentInChildren =
-      IL2CPP::ResolveCall(UNITY_GAMEOBJECT_GETCOMPONENTINCHILDREN);
+      IL2CPP::Class::Utils::GetMethodPointer("UnityEngine.GameObject",
+                                             "GetComponentInChildren", 2);
   m_GameObjectFunctions.m_GetActive =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_GETACTIVE);
   m_GameObjectFunctions.m_GetLayer =
