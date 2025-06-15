@@ -4,6 +4,7 @@
 #include "IL2CPPResolver/Defines.hpp"
 #include "IL2CPPResolver/Unity/Defines.hpp"
 #include "IL2CPPResolver/Unity/Structures/il2cpp.hpp"
+#include <string>
 #include <vector>
 namespace IL2CPP {
 namespace Class {
@@ -103,7 +104,9 @@ public:
   void *GetMethodPointer(const char *m_pMethodName, int m_iArgs = -1);
 
   m_eClassPropType GetPropType(const char *m_pPropType);
-
+  Unity::il2cppClass *GetIl2cppClass() const;
+  std::string GetType() const;
+  bool Is(Unity::il2cppClass *m_pClass) const;
   // Call Method
   template <typename TReturn, typename... TArgs>
   TReturn CallMethod(void *m_pMethod, TArgs... tArgs) {

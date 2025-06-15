@@ -1,58 +1,36 @@
 #include "Engine.hpp"
 #include "IL2CPPResolver/IL2CPP_Resolver.hpp"
+#include "Quaternion.hpp"
+#include "Vector2.hpp"
+#include "Vector3.hpp"
 
-Unity::Vector2::Vector2() { x = y = 0.f; }
-Unity::Vector2::Vector2(float f1, float f2) {
-  x = f1;
-  y = f2;
-}
-Unity::Vector3::Vector3() { x = y = z = 0.f; }
-Unity::Vector3::Vector3(float f1, float f2, float f3) {
-  x = f1;
-  y = f2;
-  z = f3;
-}
-float Unity::Vector3::Length() { return x * x + y * y + z * z; }
-float Unity::Vector3::Dot(Vector3 b) { return x * b.x + y * b.y + z * b.z; }
-Unity::Vector3 Unity::Vector3::Normalize() {
-  float len = Length();
-  if (len > 0)
-    return Vector3(x / len, y / len, z / len);
-  else
-    return Vector3(x, y, z);
-}
-void Unity::Vector3::ToVectors(Vector3 *m_pForward, Vector3 *m_pRight,
-                               Vector3 *m_pUp) {
-  float m_fDeg2Rad = static_cast<float>(M_PI) / 180.f;
+namespace Unity {
+constexpr float floatInf = std::numeric_limits<float>::infinity();
 
-  float m_fSinX = sinf(x * m_fDeg2Rad);
-  float m_fCosX = cosf(x * m_fDeg2Rad);
+const Vector2 Vector2::positiveInfinity = {floatInf, floatInf};
+const Vector2 Vector2::negativeInfinity = {-floatInf, -floatInf};
+const Vector2 Vector2::down = {0.f, -1.f};
+const Vector2 Vector2::left = {-1.f, 0.f};
+const Vector2 Vector2::one = {1.f, 1.f};
+const Vector2 Vector2::right = {1.f, 0.f};
+const Vector2 Vector2::up = {0.f, 1.f};
+const Vector2 Vector2::zero = {0.f, 0.f};
 
-  float m_fSinY = sinf(y * m_fDeg2Rad);
-  float m_fCosY = cosf(y * m_fDeg2Rad);
+Vector2::operator Vector3() const { return {x, y, 0}; }
 
-  float m_fSinZ = sinf(z * m_fDeg2Rad);
-  float m_fCosZ = cosf(z * m_fDeg2Rad);
+const Vector3 Vector3::positiveInfinity = {floatInf, floatInf, floatInf};
+const Vector3 Vector3::negativeInfinity = {-floatInf, -floatInf, -floatInf};
+const Vector3 Vector3::back = {0.f, 0.f, -1.f};
+const Vector3 Vector3::down = {0.f, -1.f, 0.f};
+const Vector3 Vector3::forward = {0.f, 0.f, 1.f};
+const Vector3 Vector3::left = {-1.f, 0.f, 0.f};
+const Vector3 Vector3::one = {1.f, 1.f, 1.f};
+const Vector3 Vector3::right = {1.f, 0.f, 0.f};
+const Vector3 Vector3::up = {0.f, 1.f, 0.f};
+const Vector3 Vector3::zero = {0.f, 0.f, 0.f};
 
-  if (m_pForward) {
-    m_pForward->x = m_fCosX * m_fCosY;
-    m_pForward->y = -m_fSinX;
-    m_pForward->z = m_fCosX * m_fSinY;
-  }
-
-  if (m_pRight) {
-    m_pRight->x =
-        -1.f * m_fSinZ * m_fSinX * m_fCosY + -1.f * m_fCosZ * -m_fSinY;
-    m_pRight->y = -1.f * m_fSinZ * m_fCosX;
-    m_pRight->z = -1.f * m_fSinZ * m_fSinX * m_fSinY + -1.f * m_fCosZ * m_fCosY;
-  }
-
-  if (m_pUp) {
-    m_pUp->x = m_fCosZ * m_fSinX * m_fCosY + -m_fSinZ * -m_fSinY;
-    m_pUp->y = m_fCosZ * m_fCosX;
-    m_pUp->z = m_fCosZ * m_fSinX * m_fSinY + -m_fSinZ * m_fCosY;
-  }
-}
+const Quaternion Quaternion::identity = {0.f, 0.f, 0.f, 1.f};
+} // namespace Unity
 Unity::Vector4::Vector4() { x = y = z = w = 0.f; }
 Unity::Vector4::Vector4(float f1, float f2, float f3, float f4) {
   x = f1;
@@ -60,66 +38,7 @@ Unity::Vector4::Vector4(float f1, float f2, float f3, float f4) {
   z = f3;
   w = f4;
 }
-Unity::Quaternion::Quaternion() { x = y = z = w = 0.f; }
-Unity::Quaternion::Quaternion(float f1, float f2, float f3, float f4) {
-  x = f1;
-  y = f2;
-  z = f3;
-  w = f4;
-}
-Unity::Quaternion Unity::Quaternion::Euler(float m_fX, float m_fY, float m_fZ) {
-  float m_fDeg2Rad = static_cast<float>(M_PI) / 180.f;
 
-  m_fX = m_fX * m_fDeg2Rad * 0.5f;
-  m_fY = m_fY * m_fDeg2Rad * 0.5f;
-  m_fZ = m_fZ * m_fDeg2Rad * 0.5f;
-
-  float m_fSinX = sinf(m_fX);
-  float m_fCosX = cosf(m_fX);
-
-  float m_fSinY = sinf(m_fY);
-  float m_fCosY = cosf(m_fY);
-
-  float m_fSinZ = sinf(m_fZ);
-  float m_fCosZ = cosf(m_fZ);
-
-  x = m_fCosY * m_fSinX * m_fCosZ + m_fSinY * m_fCosX * m_fSinZ;
-  y = m_fSinY * m_fCosX * m_fCosZ - m_fCosY * m_fSinX * m_fSinZ;
-  z = m_fCosY * m_fCosX * m_fSinZ - m_fSinY * m_fSinX * m_fCosZ;
-  w = m_fCosY * m_fCosX * m_fCosZ + m_fSinY * m_fSinX * m_fSinZ;
-
-  return *this;
-}
-Unity::Quaternion Unity::Quaternion::Euler(Vector3 m_vRot) {
-  return Euler(m_vRot.x, m_vRot.y, m_vRot.z);
-}
-Unity::Vector3 Unity::Quaternion::ToEuler() {
-  Vector3 m_vEuler;
-
-  float m_fDist = (x * x) + (y * y) + (z * z) + (w * w);
-
-  float m_fTest = x * w - y * z;
-  if (m_fTest > 0.4995f * m_fDist) {
-    m_vEuler.x = static_cast<float>(M_PI) * 0.5f;
-    m_vEuler.y = 2.f * atan2f(y, x);
-    m_vEuler.z = 0.f;
-  } else if (m_fTest < -0.4995f * m_fDist) {
-    m_vEuler.x = static_cast<float>(M_PI) * -0.5f;
-    m_vEuler.y = -2.f * atan2f(y, x);
-    m_vEuler.z = 0.f;
-  } else {
-    m_vEuler.x = asinf(2.f * (w * x - y * z));
-    m_vEuler.y = atan2f(2.f * w * y + 2.f * z * x, 1.f - 2.f * (x * x + y * y));
-    m_vEuler.z = atan2f(2.f * w * z + 2.f * x * y, 1.f - 2.f * (z * z + x * x));
-  }
-
-  float m_fRad2Deg = 180.f / static_cast<float>(M_PI);
-  m_vEuler.x *= m_fRad2Deg;
-  m_vEuler.y *= m_fRad2Deg;
-  m_vEuler.z *= m_fRad2Deg;
-
-  return m_vEuler;
-}
 Unity::Rect::Rect() { fX = fY = fWidth = fHeight = 0.f; }
 Unity::Rect::Rect(float f1, float f2, float f3, float f4) {
   fX = f1;

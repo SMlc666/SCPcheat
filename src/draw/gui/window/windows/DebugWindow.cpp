@@ -41,19 +41,41 @@ void DebugWindow::OnRender() {
 
       Unity::Vector3 vec3 = transform->GetPosition();
       LogInstance::getMainLogger().info(" x y z:", vec3.x, vec3.y, vec3.z);
-      auto gameobject = localplayer->GetGameObject();
-      LogInstance::getMainLogger().info("GameObject : {:p}",
-                                        reinterpret_cast<void *>(gameobject));
-      if (gameobject) {
-        auto skin = gameobject->GetComponentInChildren(
-            "UnityEngine.SkinnedMeshRenderer");
-        if (skin) {
-          LogInstance::getMainLogger().info("SkinnedMeshRenderer : {:p}",
-                                            reinterpret_cast<void *>(skin));
+      auto playerClass = localplayer->getPlayerClass();
+      if (playerClass) {
+        LogInstance::getMainLogger().info(
+            "PlayerClass : {:p}", reinterpret_cast<void *>(playerClass));
+        auto gameobject = playerClass->getPlayerModel();
+        if (gameobject) {
 
+          LogInstance::getMainLogger().info(
+              "GameObject : {:p}", reinterpret_cast<void *>(gameobject));
+          if (gameobject) {
+            auto skin = gameobject->GetComponentInChildren(
+                "UnityEngine.SkinnedMeshRenderer");
+
+            if (skin) {
+              LogInstance::getMainLogger().info("SkinnedMeshRenderer : {:p}",
+                                                reinterpret_cast<void *>(skin));
+
+            } else {
+              LogInstance::getMainLogger().info("No SkinnedMeshRenderer found");
+            }
+
+            auto renderer =
+                gameobject->GetComponentInChildren("UnityEngine.Renderer");
+            if (renderer) {
+              LogInstance::getMainLogger().info(
+                  "Renderer : {:p}", reinterpret_cast<void *>(renderer));
+            } else {
+              LogInstance::getMainLogger().info("No Renderer found");
+            }
+          }
         } else {
-          LogInstance::getMainLogger().info("No SkinnedMeshRenderer found");
+          LogInstance::getMainLogger().info("No PlayerModel found");
         }
+      } else {
+        LogInstance::getMainLogger().info("No PlayerClass found");
       }
       IL2CPP::Thread::Detach(thisThread);
     }

@@ -4,33 +4,32 @@
 #include "safetyhook.hpp"
 #include <cstdint>
 
-safetyhook::InlineHook Weapon_ShootServer_hook;
+safetyhook::InlineHook Weapon_DoShoot_hook;
 namespace zr {
 
-WeaponShootServerCallbackList weaponShootServerCallbacks;
-std::vector<std::function<void(Weapon *)>> WeaponShootServerOnceCallbackList;
-static void Weapon_ShootServer_Proxy(Weapon *m_pWeapon, uint16_t playerId,
-                                     Unity::Vector3 direction) {
+WeaponDoShootCallbackList weaponDoShootCallbacks;
+std::vector<std::function<void(Weapon *)>> WeaponDoShootOnceCallbackList;
+static void Weapon_DoShoot_Proxy(Weapon *m_pWeapon) {
   // 调用原始函数
-  Weapon_ShootServer_hook.call(m_pWeapon, playerId, direction);
+  Weapon_DoShoot_hook.call(m_pWeapon);
   // 执行所有注册的回调
-  weaponShootServerCallbacks(m_pWeapon);
+  weaponDoShootCallbacks(m_pWeapon);
 
   // 执行一次性回调并移除它们
-  for (auto it = WeaponShootServerOnceCallbackList.begin();
-       it != WeaponShootServerOnceCallbackList.end();) {
+  for (auto it = WeaponDoShootOnceCallbackList.begin();
+       it != WeaponDoShootOnceCallbackList.end();) {
     (*it)(m_pWeapon);
-    it = WeaponShootServerOnceCallbackList.erase(it);
+    it = WeaponDoShootOnceCallbackList.erase(it);
   }
 }
 void setupU3DWeaponShoot() {
-  void *Weapon_ShootServerAddr = IL2CPP::Class::Utils::GetMethodPointer(
-      "Akequ.Base.Weapon", "ShootServer", 2);
-  if (Weapon_ShootServerAddr == nullptr) {
-    LogInstance::getMainLogger().error("Failed to find Weapon::ShootServer");
+  void *Weapon_DoShootAddr =
+      IL2CPP::Class::Utils::GetMethodPointer("Akequ.Base.Weapon", "DoShoot", 0);
+  if (Weapon_DoShootAddr == nullptr) {
+    LogInstance::getMainLogger().error("Failed to find Weapon::DoShoot");
     return;
   }
-  Weapon_ShootServer_hook = safetyhook::create_inline(Weapon_ShootServerAddr,
-                                                      Weapon_ShootServer_Proxy);
+  Weapon_DoShoot_hook =
+      safetyhook::create_inline(Weapon_DoShootAddr, Weapon_DoShoot_Proxy);
 }
 } // namespace zr

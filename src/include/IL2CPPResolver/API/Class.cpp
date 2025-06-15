@@ -1,6 +1,7 @@
 #include "Class.hpp"
 #include "IL2CPPResolver/API/Domain.hpp"
 #include <cstring>
+#include <fmt/core.h>
 
 Unity::il2cppFieldInfo *IL2CPP::Class::GetFields(Unity::il2cppClass *m_pClass,
                                                  void **m_pIterator) {
@@ -402,4 +403,23 @@ IL2CPP::m_eClassPropType IL2CPP::CClass::GetPropType(const char *m_pPropType) {
     return m_eClassPropType::Method;
 
   return m_eClassPropType::Unknown;
+}
+Unity::il2cppClass *IL2CPP::CClass::GetIl2cppClass() const {
+  if (m_Object.m_pClass == nullptr) {
+    return nullptr;
+  }
+  return m_Object.m_pClass;
+}
+std::string IL2CPP::CClass::GetType() const {
+  if (m_Object.m_pClass == nullptr) {
+    return "";
+  }
+  return fmt::format("{}.{}", m_Object.m_pClass->m_pNamespace,
+                     m_Object.m_pClass->m_pName);
+}
+bool IL2CPP::CClass::Is(Unity::il2cppClass *m_pClass) const {
+  if (m_Object.m_pClass == m_pClass) {
+    return true;
+  }
+  return false;
 }

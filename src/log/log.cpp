@@ -9,7 +9,7 @@
 
 static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> loggers;
 static std::shared_ptr<spdlog::sinks::ringbuffer_sink<std::mutex>> sink =
-    std::make_shared<spdlog::sinks::ringbuffer_sink<std::mutex>>(100);
+    std::make_shared<spdlog::sinks::ringbuffer_sink<std::mutex>>(3000);
 
 namespace zr {
 

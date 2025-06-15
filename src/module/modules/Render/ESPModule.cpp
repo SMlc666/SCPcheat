@@ -165,6 +165,7 @@ void ESPModule::renderESP() {
     return;
   }
 
+  auto localtransform = localPlayer->GetTransform();
   // Get all players
   auto players = zr::Player::getAllPlayers();
   if (players.empty()) {
@@ -173,7 +174,7 @@ void ESPModule::renderESP() {
   }
 
   auto drawList = ImGui::GetBackgroundDrawList();
-  Unity::Vector3 localPlayerPos = localPlayer->GetTransform()->GetPosition();
+  Unity::Vector3 localPlayerPos = localtransform->GetPosition();
 
   for (auto player : players) {
     if (!player || player == localPlayer || !player->isInit()) {

@@ -13,15 +13,17 @@ namespace zr {
 class AimbotModule : public Module {
 public:
   enum class AimPriority { Distance, Health };
+  enum class AimMode { MouseLook, MouseMove };
 
 private:
-  bool aimbotEnabled = true;
+  AimMode aimMode = AimMode::MouseLook;
+  int aimSmooth = 5;
   AimPriority aimPriority = AimPriority::Distance;
   float aimFov = 100.0f;
   bool drawFov = true;
   ImVec4 fovColor{1.0f, 1.0f, 1.0f, 0.3f};
 
-  WeaponShootServerCallbackList::Handle weaponShootHandle;
+  WeaponDoShootCallbackList::Handle weaponShootHandle;
   eventpp::CallbackList<void()>::Handle renderHandle;
 
   void onWeaponShoot(Weapon *weapon);

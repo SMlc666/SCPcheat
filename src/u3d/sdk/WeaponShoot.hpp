@@ -4,11 +4,9 @@
 
 namespace zr {
 void setupU3DWeaponShoot();
-using WeaponShootServerCallbackList = eventpp::CallbackList<void(Weapon *)>;
+using WeaponDoShootCallbackList = eventpp::CallbackList<void(Weapon *)>;
 
-extern WeaponShootServerCallbackList weaponShootServerCallbacks;
-extern std::vector<std::function<void(Weapon *)>>
-    WeaponShootServerOnceCallbackList;
-
+extern WeaponDoShootCallbackList weaponDoShootCallbacks;
+extern std::vector<std::function<void(Weapon *)>> WeaponDoShootOnceCallbackList;
 
 } // namespace zr

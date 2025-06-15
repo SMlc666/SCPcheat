@@ -1,7 +1,8 @@
 #pragma once
 
 #include "IL2CPPResolver/Unity/API/Object.hpp"
-#include "IL2CPPResolver/Unity/Structures/Engine.hpp"
+#include "IL2CPPResolver/Unity/Structures/Quaternion.hpp"
+
 /*
 class UnityStandardAssets.Characters.FirstPerson.MouseLook : System.Object
 {

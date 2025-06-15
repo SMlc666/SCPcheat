@@ -1,8 +1,8 @@
 #pragma once
 
 #include "IL2CPPResolver/API/Class.hpp"
+#include "IL2CPPResolver/Unity/Structures/Quaternion.hpp"
 
-#include "IL2CPPResolver/Unity/Structures/Engine.hpp"
 
 namespace Unity {
 struct TransformFunctions_t {

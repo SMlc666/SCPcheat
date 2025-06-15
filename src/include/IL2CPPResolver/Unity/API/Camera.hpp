@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IL2CPPResolver/Unity/API/Component.hpp"
 #include "IL2CPPResolver/Unity/API/GameObject.hpp"
 #include "IL2CPPResolver/Unity/Structures/Engine.hpp"
 namespace Unity {
@@ -14,7 +15,7 @@ struct CameraFunctions_t {
 };
 extern CameraFunctions_t m_CameraFunctions;
 
-class CCamera : public CGameObject {
+class CCamera : public CComponent {
 public:
   float GetDepth();
 

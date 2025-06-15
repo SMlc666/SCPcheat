@@ -108,8 +108,8 @@ void Unity::GameObject::Initialize() {
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_GETACTIVE);
   m_GameObjectFunctions.m_GetLayer =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_GETLAYER);
-  m_GameObjectFunctions.m_GetTransform =
-      IL2CPP::ResolveCall(UNITY_GAMEOBJECT_GETTRANSFORM);
+  m_GameObjectFunctions.m_GetTransform = IL2CPP::Class::Utils::GetMethodPointer(
+      "UnityEngine.GameObject", "get_transform", 0);
   m_GameObjectFunctions.m_SetActive =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_SETACTIVE);
   m_GameObjectFunctions.m_SetLayer =

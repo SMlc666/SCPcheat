@@ -8,6 +8,7 @@ add_requires("nlohmann_json 3.11.3")
 add_requires("fmt")
 add_requires("microsoft-gsl 4.2.0")
 
+add_defines("NOMINMAX")
 target("scpCheat")
     set_kind("shared")
     set_languages("c++23")
