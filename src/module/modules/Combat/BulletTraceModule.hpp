@@ -1,41 +1,42 @@
 #pragma once
 
-#include "IL2CPPResolver/Unity/API/Camera.hpp"
-#include "draw/gui/gui.hpp"
+#include "IL2CPPResolver/Unity/Structures/Quaternion.hpp"
+#include "draw/draw.hpp"
+#include "draw/gui/window/windows/ModuleWindowType.hpp"
 #include "imgui.h"
 #include "module/module.hpp"
+#include "safetyhook.hpp"
 #include "u3d/sdk/Actor/Player/LocalPlayer.hpp"
 #include "u3d/sdk/Control/MouseLook.hpp"
 #include "u3d/sdk/WeaponShoot.hpp"
 
 namespace zr {
 
-class AimbotModule : public Module {
+class BulletTraceModule : public Module {
 public:
   enum class AimPriority { Distance, Health, DistanceToCrosshair };
-  enum class AimMode { MouseLook, MouseMove };
 
 private:
-  AimMode aimMode = AimMode::MouseLook;
-  int aimSmooth = 5;
+  // Config
   AimPriority aimPriority = AimPriority::Distance;
   float aimFov = 100.0f;
+  bool ignoreClassD = true;
+  float maxDistance = 300.0f;
   bool drawFov = true;
   ImVec4 fovColor{1.0f, 1.0f, 1.0f, 0.3f};
-  bool ignoreClassD = true;
-  bool ignoreSCP999 = true;
-  float maxDistance = 300.0f;
-  bool raycast = true;
-  WeaponDoShootCallbackList::Handle weaponShootHandle;
+
+  // Hook
+  static safetyhook::InlineHook UpdateHook;
+  static void Weapon_Update_Hooked(Weapon *m_pWeapon);
+  void renderFov();
   eventpp::CallbackList<void()>::Handle renderHandle;
 
-  void onWeaponShoot(Weapon *weapon);
-  void renderFov();
-
 public:
-  AimbotModule();
-  static AimbotModule *getInstance();
+  BulletTraceModule();
+  ~BulletTraceModule();
+  static BulletTraceModule *getInstance();
 
+  std::optional<std::string> load() override;
   std::optional<std::string> enable() override;
   std::optional<std::string> disable() override;
   std::optional<std::string> drawGUI() override;

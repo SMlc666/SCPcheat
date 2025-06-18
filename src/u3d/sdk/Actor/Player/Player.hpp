@@ -2,6 +2,7 @@
 
 #include "IL2CPPResolver/Unity/API/Component.hpp"
 #include "IL2CPPResolver/Unity/Structures/Engine.hpp"
+#include "u3d/sdk/Actor/Collider/CapsuleCollider.hpp"
 #include "u3d/sdk/Actor/Player/PlayerClass.hpp"
 #include "u3d/sdk/Control/FirstPersonController.hpp"
 #include "u3d/sdk/Control/PositionControllerAC.hpp"
@@ -25,5 +26,6 @@ public:
   bool isAdmin();
   FirstPersonController *getFirstPersonController();
   PositionControllerAC *getPositionControllerAC();
+  CapsuleCollider *getCapsuleCollider();
 };
 } // namespace zr

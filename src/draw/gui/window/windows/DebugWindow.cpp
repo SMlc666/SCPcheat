@@ -11,7 +11,9 @@
 #include "draw/gui/window/WindowManager.hpp"
 #include "imgui.h"
 #include "log/log.hpp"
+#include "spdlog/fmt/bundled/format.h"
 #include "u3d/sdk/Actor/Player/LocalPlayer.hpp"
+#include "u3d/sdk/Actor/Player/Player.hpp"
 
 namespace zr {
 DebugWindow *DebugWindow::GetInstance() {
@@ -100,6 +102,56 @@ void DebugWindow::OnRender() {
     // This will cause a crash, triggering the crash dump handler
     int *p = nullptr;
     *p = 42; // Dereferencing a null pointer
+  }
+  if (ImGui::TreeNode("Player List")) {
+    auto players = Player::getAllPlayers();
+    for (auto player : players) {
+      if (ImGui::TreeNode(player->getAccountName().c_str())) {
+        ImGui::Text("Player Name: %s", player->getAccountName().c_str());
+        ImGui::Text("Player Health: %d", player->getHealth());
+        ImGui::Text("Player Max Health: %d", player->getMaxHealth());
+        auto playerclass = player->getPlayerClass();
+        if (playerclass) {
+          ImGui::Text("Player Class: %s", playerclass->getName().c_str());
+          ImGui::Text("Player Class Name: %s",
+                      playerclass->getTeamID().c_str());
+        }
+        auto transform = player->GetTransform();
+        if (transform) {
+          auto position = transform->GetPosition();
+
+          ImGui::Text("Player Position: %.2f, %.2f, %.2f", position.x,
+                      position.y, position.z);
+
+          auto rotation = transform->GetRotation();
+          ImGui::Text("Player Rotation: %.2f, %.2f, %.2f", rotation.x,
+                      rotation.y, rotation.z);
+        }
+        if (ImGui::TreeNode("components")) {
+          auto gameobject = player->GetGameObject();
+          if (gameobject) {
+            auto components =
+                gameobject->GetComponents("UnityEngine.Component");
+            if (components) {
+              for (int i = 0; i < components->m_uMaxLength; i++) {
+                auto component = components->At(i);
+                if (ImGui::TreeNode(
+                        fmt::format("component {} {}", i, component->GetType())
+                            .c_str())) {
+                  ImGui::Text("component type: %s",
+                              component->GetType().c_str());
+                  ImGui::TreePop();
+                  
+                }
+              }
+            }
+          }
+          ImGui::TreePop();
+        }
+        ImGui::TreePop();
+      }
+    }
+    ImGui::TreePop();
   }
   ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 }

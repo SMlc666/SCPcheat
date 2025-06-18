@@ -3,7 +3,6 @@
 #include "IL2CPPResolver/API/Class.hpp"
 #include "IL2CPPResolver/Unity/Structures/Quaternion.hpp"
 
-
 namespace Unity {
 struct TransformFunctions_t {
   void *m_GetParent = nullptr;

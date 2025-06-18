@@ -68,6 +68,15 @@ Unity::il2cppClass *ClassFromType(Unity::il2cppType *type);
 void *GetMethodPointer(const char *m_pClassName, const char *m_pMethodName,
                        std::initializer_list<const char *> m_vNames);
 
+void *GetMethodPointer(Unity::il2cppClass *m_pClass, const char *m_pMethodName,
+                      std::initializer_list<const char *> m_vNames);
+
+void *GetMethodPointer(const char *m_pClassName, const char *m_pMethodName,
+                      const std::vector<const char *> &m_vNames);
+
+void *GetMethodPointer(Unity::il2cppClass *m_pClass, const char *m_pMethodName,
+                      const std::vector<const char *> &m_vNames);
+
 Unity::il2cppClass *FilterClass(std::vector<Unity::il2cppClass *> *m_pClasses,
                                 std::initializer_list<const char *> m_vNames,
                                 int m_iFoundCount = -1);

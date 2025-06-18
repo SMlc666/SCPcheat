@@ -100,7 +100,8 @@ void Unity::GameObject::Initialize() {
   m_GameObjectFunctions.m_GetComponent =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_GETCOMPONENT);
   m_GameObjectFunctions.m_GetComponents =
-      IL2CPP::ResolveCall(UNITY_GAMEOBJECT_GETCOMPONENTS);
+      IL2CPP::Class::Utils::GetMethodPointer("UnityEngine.GameObject",
+                                             "GetComponentsInternal", 6);
   m_GameObjectFunctions.m_GetComponentInChildren =
       IL2CPP::Class::Utils::GetMethodPointer("UnityEngine.GameObject",
                                              "GetComponentInChildren", 2);

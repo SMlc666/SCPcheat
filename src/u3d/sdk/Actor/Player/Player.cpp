@@ -1,7 +1,9 @@
 #include "Player.hpp"
+#include "IL2CPPResolver/Unity/API/GameObject.hpp"
 #include "IL2CPPResolver/Unity/API/Object.hpp"
 #include "IL2CPPResolver/Unity/Structures/Engine.hpp"
 #include "IL2CPPResolver/Unity/Structures/System_String.hpp"
+#include "u3d/sdk/Actor/Collider/CapsuleCollider.hpp"
 #include <cstdint>
 #include <vector>
 
@@ -59,4 +61,8 @@ std::vector<zr::Player *> zr::Player::getAllPlayers() {
   }
 
   return validPlayers;
+}
+zr::CapsuleCollider *zr::Player::getCapsuleCollider() {
+  return static_cast<CapsuleCollider *>(
+      GetGameObject()->GetComponent("UnityEngine.CapsuleCollider"));
 }

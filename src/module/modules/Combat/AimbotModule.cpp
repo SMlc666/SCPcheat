@@ -1,8 +1,12 @@
 #include "AimbotModule.hpp"
 #include "IL2CPPResolver/API/Domain.hpp"
 #include "IL2CPPResolver/API/Thread.hpp"
+#include "IL2CPPResolver/Unity/API/GameObject.hpp"
+#include "IL2CPPResolver/Unity/API/Physics.hpp"
 #include "IL2CPPResolver/Unity/API/Transform.hpp"
+#include "IL2CPPResolver/Unity/Structures/RaycastHit.hpp"
 #include "draw/draw.hpp"
+#include "imgui.h"
 #include "log/log.hpp"
 #include "module/ModuleRegistrar.hpp"
 #include "u3d/sdk/Actor/Player/Player.hpp"
@@ -104,7 +108,7 @@ std::optional<std::string> AimbotModule::disable() {
 
 std::optional<std::string> AimbotModule::drawGUI() {
   ImGui::Separator();
-  const char *items[] = {"Distance", "Health"};
+  const char *items[] = {"Distance", "Health", "Distance To Crosshair"};
   int currentItem = static_cast<int>(aimPriority);
   if (ImGui::Combo("Aim Priority", &currentItem, items, IM_ARRAYSIZE(items))) {
     aimPriority = static_cast<AimPriority>(currentItem);
@@ -122,6 +126,10 @@ std::optional<std::string> AimbotModule::drawGUI() {
   }
 
   ImGui::SliderFloat("Aim FOV", &aimFov, 1.0f, 1000.0f, "%.1f");
+  ImGui::SliderFloat("Max Distance", &maxDistance, 1.0f, 1000.0f, "%.1f");
+  ImGui::Checkbox("ignoreClassD", &ignoreClassD);
+  ImGui::Checkbox("ignoreSCP999", &ignoreSCP999);
+  ImGui::Checkbox("Raycast", &raycast);
   ImGui::Separator();
   ImGui::Checkbox("Draw FOV", &drawFov);
   ImGui::ColorEdit4("FOV Color", &fovColor.x);
@@ -180,6 +188,16 @@ void AimbotModule::onWeaponShoot(Weapon *weapon) {
     if (playeam.find("Spectator") != std::string::npos) {
       continue;
     }
+    if (ignoreClassD) {
+      if (player->getClassName() == "ClassD") {
+        continue;
+      }
+    }
+    if (ignoreSCP999) {
+      if (player->getClassName() == "SCP999") {
+        continue;
+      }
+    }
     Unity::Vector3 playerPosition = playerTransform->GetPosition();
     Unity::Vector2 screenPosition;
 
@@ -203,6 +221,32 @@ void AimbotModule::onWeaponShoot(Weapon *weapon) {
           closestValue = player->getHealth();
           bestTarget = player;
         }
+      } else if (aimPriority == AimPriority::DistanceToCrosshair) {
+        if (distanceToCenter < closestValue) {
+          closestValue = distanceToCenter;
+          bestTarget = player;
+        }
+      }
+      if (raycast) {
+        auto cameraTransform = mainCamera->GetTransform();
+        if (!cameraTransform) {
+          continue;
+        }
+        Unity::Vector3 rayOrigin = cameraTransform->GetPosition();
+        Unity::Vector3 direction = (playerPosition - rayOrigin).normalized();
+        Unity::RaycastHit hitInfo;
+        int layerMask = ~(1 << 2); // Ignore Raycast Layer
+
+        if (Unity::Physics::Raycast(rayOrigin, direction, hitInfo, maxDistance,
+                                    layerMask)) {
+          auto playerCollider = player->getCapsuleCollider();
+          if (!playerCollider || !playerCollider->contains(hitInfo.point)) {
+            continue; // Obstacle detected or hit point not in collider
+          }
+        } else {
+          continue; // Nothing hit, target is likely too far or not in line of
+                    // sight
+        }
       }
     }
   }
@@ -211,15 +255,23 @@ void AimbotModule::onWeaponShoot(Weapon *weapon) {
     auto targetTransform = bestTarget->GetTransform();
     if (aimMode == AimMode::MouseLook) {
       Unity::Vector3 direction =
-          targetTransform->GetPosition() - localtransform->GetPosition();
-      Unity::Quaternion rotation = Unity::Quaternion::LookRotation(direction);
+          (targetTransform->GetPosition() - localtransform->GetPosition())
+              .normalized();
+
+      float yaw = atan2f(direction.x, direction.z) * 180.0f / M_PI;
+      float pitch = -asinf(direction.y) * 180.0f / M_PI;
+
+      Unity::Quaternion characterRotation =
+          Unity::Quaternion::FromEuler(0.0f, yaw, 0.0f);
+      Unity::Quaternion cameraRotation =
+          Unity::Quaternion::FromEuler(pitch, 0.0f, 0.0f);
 
       auto fpc = localPlayer->getFirstPersonController();
       if (fpc) {
         auto mouseLook = fpc->getMouseLook();
         if (mouseLook) {
-          mouseLook->setCharacterTargetRot(rotation);
-          mouseLook->setCameraTargetRot(rotation);
+          mouseLook->setCharacterTargetRot(characterRotation);
+          mouseLook->setCameraTargetRot(cameraRotation);
         }
       }
     } else if (aimMode == AimMode::MouseMove) {
@@ -250,6 +302,11 @@ std::optional<std::string> AimbotModule::toJson(nlohmann::json &json) const {
   json["aimSmooth"] = aimSmooth;
   json["aimFov"] = aimFov;
   json["drawFov"] = drawFov;
+  json["ignoreClassD"] = ignoreClassD;
+  json["ignoreSCP999"] = ignoreSCP999;
+  json["maxDistance"] = maxDistance;
+  json["raycast"] = raycast;
+
   zr::toJson(json["fovColor"], fovColor);
   return std::nullopt;
 }
@@ -260,6 +317,11 @@ std::optional<std::string> AimbotModule::fromJson(const nlohmann::json &json) {
   aimSmooth = json.value("aimSmooth", 5);
   aimFov = json.value("aimFov", 100.0f);
   drawFov = json.value("drawFov", true);
+  ignoreClassD = json.value("ignoreClassD", true);
+  ignoreSCP999 = json.value("ignoreSCP999", true);
+  maxDistance = json.value("maxDistance", 300.0f);
+  raycast = json.value("raycast", true);
+
   zr::fromJson(
       json.value("fovColor", nlohmann::json::array({1.0f, 1.0f, 1.0f, 0.3f})),
       fovColor, ImVec4(1.0f, 1.0f, 1.0f, 0.3f));

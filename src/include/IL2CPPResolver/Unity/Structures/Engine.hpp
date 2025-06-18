@@ -23,10 +23,6 @@ struct Plane {
   float fDistance;
 };
 
-struct Ray {
-  Vector3 m_vOrigin;
-  Vector3 m_vDirection;
-};
 
 struct Rect {
   float fX, fY;
