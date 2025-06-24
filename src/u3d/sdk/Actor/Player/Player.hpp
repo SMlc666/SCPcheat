@@ -4,6 +4,7 @@
 #include "IL2CPPResolver/Unity/Structures/Engine.hpp"
 #include "u3d/sdk/Actor/Collider/CapsuleCollider.hpp"
 #include "u3d/sdk/Actor/Player/PlayerClass.hpp"
+#include "u3d/sdk/Base/AmmoData.hpp"
 #include "u3d/sdk/Control/FirstPersonController.hpp"
 #include "u3d/sdk/Control/PositionControllerAC.hpp"
 #include <cstdint>
@@ -24,6 +25,7 @@ public:
   uint32_t getMaxHealth();
   bool isInit();
   bool isAdmin();
+  std::vector<AmmoData *> getAmmoData();
   FirstPersonController *getFirstPersonController();
   PositionControllerAC *getPositionControllerAC();
   CapsuleCollider *getCapsuleCollider();

@@ -1,53 +1,58 @@
 #pragma once
 #include "il2cppArray.hpp"
+#include <map>
+#include <vector>
 namespace Unity {
 template <typename TKey, typename TValue>
 struct il2cppDictionary : il2cppObject {
   struct Entry {
-    int m_iHashCode;
-    int m_iNext;
-    TKey m_tKey;
-    TValue m_tValue;
+    int hashCode{}, next{};
+    TKey key{};
+    TValue value{};
   };
-  il2cppArray<int> *m_pBuckets;
-  il2cppArray<Entry *> *m_pEntries;
-  int m_iCount;
-  int m_iVersion;
-  int m_iFreeList;
-  int m_iFreeCount;
-  void *m_pComparer;
-  void *m_pKeys;
-  void *m_pValues;
+  il2cppArray<int> *buckets{};
+  il2cppArray<Entry> *entries{};
+  int count{};
+  int version{};
+  int freeList{};
+  int freeCount{};
+  void *comparer{};
+  il2cppArray<TKey> *keys{};
+  il2cppArray<TValue> *values{};
+  void *syncRoot{};
 
-  Entry *GetEntry() { return (Entry *)m_pEntries->GetData(); }
-
-  TKey GetKeyByIndex(int iIndex) {
-    TKey tKey = {0};
-
-    Entry *pEntry = GetEntry();
-    if (pEntry)
-      tKey = pEntry[iIndex].m_tKey;
-
-    return tKey;
+  /**
+      @brief Convert to std::map.
+      @return Map of elements
+  */
+  std::map<TKey, TValue> ToMap() const {
+    std::map<TKey, TValue> ret{};
+    for (auto it = (Entry *)&entries->m_pValues;
+         it != ((Entry *)&entries->m_pValues + count); ++it)
+      ret.emplace(std::make_pair(it->key, it->value));
+    return ret;
   }
 
-  TValue GetValueByIndex(int iIndex) {
-    TValue tValue = {0};
-
-    Entry *pEntry = GetEntry();
-    if (pEntry)
-      tValue = pEntry[iIndex].m_tValue;
-
-    return tValue;
+  /**
+      @brief Convert to std::vector.
+      @return Vector of keys
+  */
+  std::vector<TKey> GetKeys() const {
+    std::vector<TKey> ret{};
+    for (int i = 0; i < count; ++i)
+      ret.emplace_back(entries->m_pValues[i].key);
+    return ret;
   }
 
-  TValue GetValueByKey(TKey tKey) {
-    TValue tValue = {0};
-    for (int i = 0; i < m_iCount; i++) {
-      if (GetEntry()[i].m_tKey == tKey)
-        tValue = GetEntry()[i].m_tValue;
-    }
-    return tValue;
+  /**
+      @brief Convert to std::vector.
+      @return Vector of values
+  */
+  std::vector<TValue> GetValues() const {
+    std::vector<TValue> ret{};
+    for (int i = 0; i < count; ++i)
+      ret.emplace_back(entries->m_pValues[i].value);
+    return ret;
   }
 };
 } // namespace Unity

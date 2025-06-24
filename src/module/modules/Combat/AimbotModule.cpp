@@ -9,6 +9,7 @@
 #include "imgui.h"
 #include "log/log.hpp"
 #include "module/ModuleRegistrar.hpp"
+#include "u3d/sdk/Actor/Collider/Collider.hpp"
 #include "u3d/sdk/Actor/Player/Player.hpp"
 #include "u3d/sdk/Control/FirstPersonController.hpp"
 
@@ -235,13 +236,22 @@ void AimbotModule::onWeaponShoot(Weapon *weapon) {
         Unity::Vector3 rayOrigin = cameraTransform->GetPosition();
         Unity::Vector3 direction = (playerPosition - rayOrigin).normalized();
         Unity::RaycastHit hitInfo;
-        int layerMask = ~(1 << 2); // Ignore Raycast Layer
 
-        if (Unity::Physics::Raycast(rayOrigin, direction, hitInfo, maxDistance,
-                                    layerMask)) {
+        if (Unity::Physics::Raycast(rayOrigin, direction, hitInfo,
+                                    maxDistance)) {
+          auto hitObject = reinterpret_cast<Collider *>(hitInfo.GetCollider())
+                               ->GetGameObject();
+          if (hitObject) {
+            getLogger().info("PROBE HIT: Object='{}', Layer={}",
+                             hitObject->GetName()->ToString(),
+                             hitObject->GetLayer());
+          }
           auto playerCollider = player->getCapsuleCollider();
-          if (!playerCollider || !playerCollider->contains(hitInfo.point)) {
-            continue; // Obstacle detected or hit point not in collider
+          if (!playerCollider) {
+            continue;
+          }
+          if (!playerCollider->contains(hitInfo.point)) {
+            continue;
           }
         } else {
           continue; // Nothing hit, target is likely too far or not in line of

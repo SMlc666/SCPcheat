@@ -257,7 +257,8 @@ void *IL2CPP::Class::Utils::GetMethodPointer(
     Unity::il2cppType **m_pCurrentParameterTypes = m_pMethod->m_pParameters;
     for (int i = 0; i < m_iNamesCount; ++i) {
       Unity::il2cppType *m_pCurrentParameterType = m_pCurrentParameterTypes[i];
-      Unity::il2cppClass *m_pParamClass = ClassFromType(m_pCurrentParameterType);
+      Unity::il2cppClass *m_pParamClass =
+          ClassFromType(m_pCurrentParameterType);
       if (!m_pParamClass || strcmp(m_pParamClass->m_pName, m_pNames[i]) != 0) {
         m_bMatch = false;
         break;
@@ -266,7 +267,8 @@ void *IL2CPP::Class::Utils::GetMethodPointer(
 #else
     Unity::il2cppParameterInfo *m_pCurrentParameters = m_pMethod->m_pParameters;
     for (int i = 0; i < m_iNamesCount; ++i) {
-      Unity::il2cppType *m_pParamType = m_pCurrentParameters[i].m_pParameterType;
+      Unity::il2cppType *m_pParamType =
+          m_pCurrentParameters[i].m_pParameterType;
       Unity::il2cppClass *m_pParamClass = ClassFromType(m_pParamType);
       if (!m_pParamClass || strcmp(m_pParamClass->m_pName, m_pNames[i]) != 0) {
         m_bMatch = false;
@@ -326,7 +328,8 @@ void *IL2CPP::Class::Utils::GetMethodPointer(
     Unity::il2cppType **m_pCurrentParameterTypes = m_pMethod->m_pParameters;
     for (int i = 0; i < m_iNamesCount; ++i) {
       Unity::il2cppType *m_pCurrentParameterType = m_pCurrentParameterTypes[i];
-      Unity::il2cppClass *m_pParamClass = ClassFromType(m_pCurrentParameterType);
+      Unity::il2cppClass *m_pParamClass =
+          ClassFromType(m_pCurrentParameterType);
       if (!m_pParamClass ||
           strcmp(m_pParamClass->m_pName, m_vNames.at(i)) != 0) {
         m_bMatch = false;
@@ -336,7 +339,8 @@ void *IL2CPP::Class::Utils::GetMethodPointer(
 #else
     Unity::il2cppParameterInfo *m_pCurrentParameters = m_pMethod->m_pParameters;
     for (int i = 0; i < m_iNamesCount; ++i) {
-      Unity::il2cppType *m_pParamType = m_pCurrentParameters[i].m_pParameterType;
+      Unity::il2cppType *m_pParamType =
+          m_pCurrentParameters[i].m_pParameterType;
       Unity::il2cppClass *m_pParamClass = ClassFromType(m_pParamType);
       if (!m_pParamClass ||
           strcmp(m_pParamClass->m_pName, m_vNames.at(i)) != 0) {
@@ -492,12 +496,23 @@ std::string IL2CPP::CClass::GetType() const {
   if (m_Object.m_pClass == nullptr) {
     return "";
   }
+  if (m_Object.m_pClass->m_pNamespace == nullptr) {
+    return m_Object.m_pClass->m_pName;
+  }
   return fmt::format("{}.{}", m_Object.m_pClass->m_pNamespace,
                      m_Object.m_pClass->m_pName);
 }
 bool IL2CPP::CClass::Is(Unity::il2cppClass *m_pClass) const {
   if (m_Object.m_pClass == m_pClass) {
     return true;
+  } else {
+    Unity::il2cppClass *m_pParent = m_Object.m_pClass->m_pParentClass;
+    while (m_pParent != nullptr) {
+      if (m_pParent == m_pClass) {
+        return true;
+      }
+      m_pParent = m_pParent->m_pParentClass;
+    }
   }
   return false;
 }

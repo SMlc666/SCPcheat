@@ -6,6 +6,7 @@
 #include "IL2CPPResolver/API/Thread.hpp"
 #include "IL2CPPResolver/Unity/API/Camera.hpp"
 #include "IL2CPPResolver/Unity/API/Component.hpp"
+#include "IL2CPPResolver/Unity/API/LayerMask.hpp"
 #include "IL2CPPResolver/Unity/API/Transform.hpp"
 #include "IL2CPPResolver/Unity/Structures/Engine.hpp"
 #include "draw/gui/window/WindowManager.hpp"
@@ -14,6 +15,7 @@
 #include "spdlog/fmt/bundled/format.h"
 #include "u3d/sdk/Actor/Player/LocalPlayer.hpp"
 #include "u3d/sdk/Actor/Player/Player.hpp"
+#include <string>
 
 namespace zr {
 DebugWindow *DebugWindow::GetInstance() {
@@ -103,29 +105,41 @@ void DebugWindow::OnRender() {
     int *p = nullptr;
     *p = 42; // Dereferencing a null pointer
   }
+  if (ImGui::TreeNode("All LayerMask")) {
+    for (int i = 0; i < 32; i++) {
+      auto layerName = Unity::LayerMask::LayerToName(i);
+      if (layerName) {
+        ImGui::Text("Layer %d: %s", i, layerName->ToString().c_str());
+      }
+    }
+    ImGui::TreePop();
+  }
   if (ImGui::TreeNode("Player List")) {
     auto players = Player::getAllPlayers();
     for (auto player : players) {
       if (ImGui::TreeNode(player->getAccountName().c_str())) {
-        ImGui::Text("Player Name: %s", player->getAccountName().c_str());
-        ImGui::Text("Player Health: %d", player->getHealth());
-        ImGui::Text("Player Max Health: %d", player->getMaxHealth());
-        auto playerclass = player->getPlayerClass();
-        if (playerclass) {
-          ImGui::Text("Player Class: %s", playerclass->getName().c_str());
-          ImGui::Text("Player Class Name: %s",
-                      playerclass->getTeamID().c_str());
-        }
-        auto transform = player->GetTransform();
-        if (transform) {
-          auto position = transform->GetPosition();
+        if (ImGui::TreeNode("Player Info ")) {
+          ImGui::Text("Player Name: %s", player->getAccountName().c_str());
+          ImGui::Text("Player Health: %d", player->getHealth());
+          ImGui::Text("Player Max Health: %d", player->getMaxHealth());
+          ImGui::Text("Player Class: %s", player->getClassName().c_str());
+          auto playerclass = player->getPlayerClass();
+          if (playerclass) {
+            ImGui::Text("Player Class Name: %s",
+                        playerclass->getTeamID().c_str());
+          }
+          auto transform = player->GetTransform();
+          if (transform) {
+            auto position = transform->GetPosition();
 
-          ImGui::Text("Player Position: %.2f, %.2f, %.2f", position.x,
-                      position.y, position.z);
+            ImGui::Text("Player Position: %.2f, %.2f, %.2f", position.x,
+                        position.y, position.z);
 
-          auto rotation = transform->GetRotation();
-          ImGui::Text("Player Rotation: %.2f, %.2f, %.2f", rotation.x,
-                      rotation.y, rotation.z);
+            auto rotation = transform->GetRotation();
+            ImGui::Text("Player Rotation: %.2f, %.2f, %.2f", rotation.x,
+                        rotation.y, rotation.z);
+          }
+          ImGui::TreePop();
         }
         if (ImGui::TreeNode("components")) {
           auto gameobject = player->GetGameObject();
@@ -141,7 +155,29 @@ void DebugWindow::OnRender() {
                   ImGui::Text("component type: %s",
                               component->GetType().c_str());
                   ImGui::TreePop();
-                  
+                }
+              }
+            }
+          }
+
+          ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("model components")) {
+          auto playerclass = player->getPlayerClass();
+          if (playerclass) {
+            auto model = playerclass->getPlayerModel();
+            if (model) {
+              auto components = model->GetComponents("UnityEngine.Component");
+              if (components) {
+                for (int i = 0; i < components->m_uMaxLength; i++) {
+                  auto component = components->At(i);
+                  if (ImGui::TreeNode(fmt::format("component {} {}", i,
+                                                  component->GetType())
+                                          .c_str())) {
+                    ImGui::Text("component type: %s",
+                                component->GetType().c_str());
+                    ImGui::TreePop();
+                  }
                 }
               }
             }

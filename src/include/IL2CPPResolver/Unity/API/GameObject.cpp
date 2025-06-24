@@ -5,6 +5,7 @@
 #include "IL2CPPResolver/IL2CPP_Resolver.hpp"
 #include "IL2CPPResolver/SystemTypeCache.hpp"
 #include "IL2CPPResolver/Unity/Defines.hpp"
+#include "log/log.hpp"
 
 Unity::GameObjectFunctions_t Unity::m_GameObjectFunctions;
 void Unity::CGameObject::AddComponent(il2cppObject *m_pSystemType) {
@@ -92,27 +93,67 @@ void Unity::GameObject::Initialize() {
   IL2CPP::SystemTypeCache::Initializer::Add(UNITY_GAMEOBJECT_CLASS);
   m_GameObjectFunctions.m_AddComponent =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_ADDCOMPONENT);
+  if (m_GameObjectFunctions.m_AddComponent) {
+    zr::LogInstance::getMainLogger().error("cannot resolve call AddComponent");
+  }
+  // 帮我添加error
   m_GameObjectFunctions.m_CreatePrimitive =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_CREATEPRIMITIVE);
+  if (m_GameObjectFunctions.m_CreatePrimitive) {
+    zr::LogInstance::getMainLogger().error(
+        "cannot resolve call CreatePrimitive");
+  }
   m_GameObjectFunctions.m_Find = IL2CPP::ResolveCall(UNITY_GAMEOBJECT_FIND);
+  if (m_GameObjectFunctions.m_Find) {
+    zr::LogInstance::getMainLogger().error("cannot resolve call Find");
+  }
   m_GameObjectFunctions.m_FindGameObjectsWithTag =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_FINDGAMEOBJECTWITHTAG);
+  if (m_GameObjectFunctions.m_FindGameObjectsWithTag) {
+    zr::LogInstance::getMainLogger().error(
+        "cannot resolve call FindGameObjectsWithTag");
+  }
   m_GameObjectFunctions.m_GetComponent =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_GETCOMPONENT);
+  if (m_GameObjectFunctions.m_GetComponent) {
+    zr::LogInstance::getMainLogger().error("cannot resolve call GetComponent");
+  }
   m_GameObjectFunctions.m_GetComponents =
       IL2CPP::Class::Utils::GetMethodPointer("UnityEngine.GameObject",
                                              "GetComponentsInternal", 6);
+  if (m_GameObjectFunctions.m_GetComponents) {
+    zr::LogInstance::getMainLogger().error("cannot resolve call GetComponents");
+  }
   m_GameObjectFunctions.m_GetComponentInChildren =
       IL2CPP::Class::Utils::GetMethodPointer("UnityEngine.GameObject",
                                              "GetComponentInChildren", 2);
+  if (m_GameObjectFunctions.m_GetComponentInChildren) {
+    zr::LogInstance::getMainLogger().error(
+        "cannot resolve call GetComponentInChildren");
+  }
   m_GameObjectFunctions.m_GetActive =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_GETACTIVE);
+  if (m_GameObjectFunctions.m_GetActive) {
+    zr::LogInstance::getMainLogger().error("cannot resolve call GetActive");
+  }
   m_GameObjectFunctions.m_GetLayer =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_GETLAYER);
+  if (m_GameObjectFunctions.m_GetLayer) {
+    zr::LogInstance::getMainLogger().error("cannot resolve call GetLayer");
+  }
   m_GameObjectFunctions.m_GetTransform = IL2CPP::Class::Utils::GetMethodPointer(
       "UnityEngine.GameObject", "get_transform", 0);
+  if (m_GameObjectFunctions.m_GetTransform) {
+    zr::LogInstance::getMainLogger().error("cannot resolve call GetTransform");
+  }
   m_GameObjectFunctions.m_SetActive =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_SETACTIVE);
+  if (m_GameObjectFunctions.m_SetActive) {
+    zr::LogInstance::getMainLogger().error("cannot resolve call SetActive");
+  }
   m_GameObjectFunctions.m_SetLayer =
       IL2CPP::ResolveCall(UNITY_GAMEOBJECT_SETLAYER);
+  if (m_GameObjectFunctions.m_SetLayer) {
+    zr::LogInstance::getMainLogger().error("cannot resolve call SetLayer");
+  }
 }
