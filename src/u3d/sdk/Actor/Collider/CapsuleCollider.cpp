@@ -2,6 +2,7 @@
 
 #include "u3d/sdk/Actor/Collider/CapsuleCollider.hpp"
 #include "IL2CPPResolver/Unity/Structures/Vector3.hpp"
+#include "IL2CPPResolver/Unity/API/Transform.hpp"
 namespace zr {
 Unity::Vector3 CapsuleCollider::getCenter() {
   return GetPropertyValue<Unity::Vector3>("center");

@@ -1,9 +1,10 @@
 #pragma once
 
 #include "IL2CPPResolver/Unity/API/Object.hpp"
-#include "IL2CPPResolver/Unity/API/Transform.hpp"
+
 namespace Unity {
 class CGameObject;
+class CTransform;
 }
 namespace Unity {
 struct ComponentFunctions_t {

@@ -3,6 +3,7 @@
 #include "IL2CPPResolver/Unity/API/Component.hpp"
 #include "IL2CPPResolver/Unity/API/GameObject.hpp"
 #include "IL2CPPResolver/Unity/Structures/Engine.hpp"
+#include "IL2CPPResolver/Unity/Structures/Ray.hpp"
 namespace Unity {
 struct CameraFunctions_t {
   void *m_GetCurrent = nullptr;
@@ -12,6 +13,7 @@ struct CameraFunctions_t {
   void *m_GetFieldOfView = nullptr;
   void *m_SetFieldOfView = nullptr;
   void *m_WorldToScreen = nullptr;
+  void *m_ScreenPointToRay = nullptr;
 };
 extern CameraFunctions_t m_CameraFunctions;
 
@@ -26,6 +28,8 @@ public:
   void SetFieldOfView(float m_fValue);
 
   bool WorldToScreen(Unity::Vector3 world, Vector2 &screen);
+
+  Ray *ScreenPointToRay(Vector3 pos);
 };
 
 namespace Camera {

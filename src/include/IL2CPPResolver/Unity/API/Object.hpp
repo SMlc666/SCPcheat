@@ -7,13 +7,14 @@ struct ObjectFunctions_t {
   void *m_Destroy = nullptr;
   void *m_FindObjectsOfType = nullptr;
   void *m_GetName = nullptr;
+  void *m_GetInstanceID = nullptr;
 };
 extern ObjectFunctions_t m_ObjectFunctions;
 
 class CObject : public IL2CPP::CClass {
 public:
   void Destroy(float fTimeDelay = 0.f);
-
+  int32_t GetInstanceID();
   System_String *GetName();
 };
 

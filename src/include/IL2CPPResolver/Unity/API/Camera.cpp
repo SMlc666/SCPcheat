@@ -56,6 +56,8 @@ void Unity::Camera::Initialize() {
       IL2CPP::ResolveCall(UNITY_CAMERA_SETFIELDOFVIEW);
   m_CameraFunctions.m_WorldToScreen = IL2CPP::Class::Utils::GetMethodPointer(
       "UnityEngine.Camera", "WorldToScreenPoint_Injected", 4);
+  m_CameraFunctions.m_ScreenPointToRay = IL2CPP::Class::Utils::GetMethodPointer(
+      "UnityEngine.Camera", "ScreenPointToRay", 1);
 }
 Unity::CCamera *Unity::Camera::GetCurrent() {
   return reinterpret_cast<CCamera *(UNITY_CALLING_CONVENTION)()>(
@@ -65,5 +67,8 @@ Unity::CCamera *Unity::Camera::GetMain() {
   return reinterpret_cast<CCamera *(UNITY_CALLING_CONVENTION)()>(
       m_CameraFunctions.m_GetMain)();
 }
-
+Unity::Ray *Unity::CCamera::ScreenPointToRay(Vector3 pos) {
+  return reinterpret_cast<Ray *(UNITY_CALLING_CONVENTION)(void *, Vector3)>(
+      m_CameraFunctions.m_ScreenPointToRay)(this, pos);
+}
 Unity::CameraFunctions_t Unity::m_CameraFunctions;

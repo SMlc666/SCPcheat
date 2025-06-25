@@ -1,4 +1,5 @@
 #include "Object.hpp"
+#include "IL2CPPResolver/API/Class.hpp"
 #include "IL2CPPResolver/API/ResolveCall.hpp"
 #include "IL2CPPResolver/IL2CPP_Resolver.hpp"
 #include "IL2CPPResolver/SystemTypeCache.hpp"
@@ -20,6 +21,12 @@ void Unity::Object::Initialize() {
   m_ObjectFunctions.m_FindObjectsOfType =
       IL2CPP::ResolveCall(UNITY_OBJECT_FINDOBJECTSOFTYPE);
   m_ObjectFunctions.m_GetName = IL2CPP::ResolveCall(UNITY_OBJECT_GETNAME);
+  m_ObjectFunctions.m_GetInstanceID = IL2CPP::Class::Utils::GetMethodPointer(
+      "UnityEngine.Object", "GetInstanceID", 0);
+}
+int32_t Unity::CObject::GetInstanceID() {
+  return reinterpret_cast<int32_t(UNITY_CALLING_CONVENTION)(void *)>(
+      m_ObjectFunctions.m_GetInstanceID)(this);
 }
 static Unity::il2cppObject *Unity::Object::New(il2cppClass *m_pClass) {
   return reinterpret_cast<Unity::il2cppObject *(

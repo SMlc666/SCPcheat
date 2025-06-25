@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IL2CPPResolver/API/Class.hpp"
+#include "IL2CPPResolver/Unity/API/Component.hpp"
 #include "IL2CPPResolver/Unity/Structures/Quaternion.hpp"
 
 namespace Unity {
@@ -21,7 +22,7 @@ struct TransformFunctions_t {
 };
 extern TransformFunctions_t m_TransformFunctions;
 
-class CTransform : public IL2CPP::CClass {
+class CTransform : public CComponent {
 public:
   CTransform *GetParent();
 
