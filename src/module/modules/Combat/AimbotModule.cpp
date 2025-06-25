@@ -12,6 +12,7 @@
 #include "u3d/sdk/Actor/Collider/Collider.hpp"
 #include "u3d/sdk/Actor/Player/Player.hpp"
 #include "u3d/sdk/Control/FirstPersonController.hpp"
+#include "u3d/sdk/Base/Item/Weapon/Weapon.hpp"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -229,28 +230,46 @@ void AimbotModule::onWeaponShoot(Weapon *weapon) {
         }
       }
       if (raycast) {
-        auto cameraTransform = mainCamera->GetTransform();
-        if (!cameraTransform) {
-          continue;
-        }
-        Unity::Vector3 rayOrigin = cameraTransform->GetPosition();
-        Unity::Vector3 direction = (playerPosition - rayOrigin).normalized();
+        Unity::Ray   ray =  *mainCamera->ScreenPointToRay(
+            {screenCenter.x, screenCenter.y, 0.f});
         Unity::RaycastHit hitInfo;
+        int32_t shootLayer = weapon->getShootLayer();
 
-        if (Unity::Physics::Raycast(rayOrigin, direction, hitInfo,
-                                    maxDistance)) {
-          auto hitObject = reinterpret_cast<Collider *>(hitInfo.GetCollider())
-                               ->GetGameObject();
-          if (hitObject) {
-            getLogger().info("PROBE HIT: Object='{}', Layer={}",
-                             hitObject->GetName()->ToString(),
-                             hitObject->GetLayer());
-          }
-          auto playerCollider = player->getCapsuleCollider();
-          if (!playerCollider) {
+        if (Unity::Physics::Raycast(ray.m_Origin, ray.m_Direction, hitInfo,
+                                    maxDistance, shootLayer)) {
+          auto hitCollider = hitInfo.GetCollider();
+          if (!hitCollider) {
             continue;
           }
-          if (!playerCollider->contains(hitInfo.point)) {
+
+          auto hitObject = ((Collider *)hitCollider)->GetGameObject();
+          if (!hitObject) {
+            continue;
+          }
+
+          auto playerObject = player->GetGameObject();
+          if (!playerObject) {
+            continue;
+          }
+
+          auto hitTransform = hitObject->GetTransform();
+          if (!hitTransform) {
+            continue;
+          }
+          auto hitRootObjectTransform  = hitTransform->GetRoot();
+          if (!hitRootObjectTransform) {
+            continue;
+          }
+
+
+
+          auto hitRootObject = hitRootObjectTransform->GetGameObject();
+          if (!hitRootObject) {
+            continue;
+          }
+
+
+          if (hitRootObject != playerObject) {
             continue;
           }
         } else {
