@@ -5,14 +5,16 @@
 #include "IL2CPPResolver/Unity/API/Physics.hpp"
 #include "IL2CPPResolver/Unity/API/Transform.hpp"
 #include "IL2CPPResolver/Unity/Structures/RaycastHit.hpp"
+#include "IL2CPPResolver/Unity/Structures/Vector2.hpp"
+#include "IL2CPPResolver/Unity/Structures/Vector3.hpp"
 #include "draw/draw.hpp"
 #include "imgui.h"
 #include "log/log.hpp"
 #include "module/ModuleRegistrar.hpp"
 #include "u3d/sdk/Actor/Collider/Collider.hpp"
 #include "u3d/sdk/Actor/Player/Player.hpp"
-#include "u3d/sdk/Control/FirstPersonController.hpp"
 #include "u3d/sdk/Base/Item/Weapon/Weapon.hpp"
+#include "u3d/sdk/Control/FirstPersonController.hpp"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -230,12 +232,19 @@ void AimbotModule::onWeaponShoot(Weapon *weapon) {
         }
       }
       if (raycast) {
-        Unity::Ray   ray =  *mainCamera->ScreenPointToRay(
-            {screenCenter.x, screenCenter.y, 0.f});
+
+        auto cameraTransform = mainCamera->GetTransform();
+        if (!cameraTransform)
+          continue; // 确保相机Transform有效
+
+        Unity::Vector3 rayOrigin = cameraTransform->GetPosition();
+        Unity::Vector3 rayDirection =
+            cameraTransform->GetForward(); // 相机正前方方向
+
         Unity::RaycastHit hitInfo;
         int32_t shootLayer = weapon->getShootLayer();
 
-        if (Unity::Physics::Raycast(ray.m_Origin, ray.m_Direction, hitInfo,
+        if (Unity::Physics::Raycast(rayOrigin, rayDirection, hitInfo,
                                     maxDistance, shootLayer)) {
           auto hitCollider = hitInfo.GetCollider();
           if (!hitCollider) {
@@ -256,18 +265,15 @@ void AimbotModule::onWeaponShoot(Weapon *weapon) {
           if (!hitTransform) {
             continue;
           }
-          auto hitRootObjectTransform  = hitTransform->GetRoot();
+          auto hitRootObjectTransform = hitTransform->GetRoot();
           if (!hitRootObjectTransform) {
             continue;
           }
-
-
 
           auto hitRootObject = hitRootObjectTransform->GetGameObject();
           if (!hitRootObject) {
             continue;
           }
-
 
           if (hitRootObject != playerObject) {
             continue;

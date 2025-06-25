@@ -1,18 +1,43 @@
 #include "WeaponModule.hpp"
 #include "IL2CPPResolver/API/Class.hpp"
+#include "IL2CPPResolver/Unity/Structures/System_String.hpp"
+#include "IL2CPPResolver/Unity/Structures/il2cpp.hpp"
+#include "IL2CPPResolver/Unity/Structures/il2cppArray.hpp"
 #include "imgui.h"
 #include "module/ModuleRegistrar.hpp"
 #include "safetyhook/inline_hook.hpp"
 #include "u3d/sdk/Actor/Player/LocalPlayer.hpp"
+#include "u3d/sdk/Base/Item/Item.hpp"
 #include "u3d/sdk/Base/Item/Weapon/Weapon.hpp"
 #include <cstdint>
 #include <optional>
 
 namespace zr {
 safetyhook::InlineHook Weapon_UpdateHook;
+safetyhook::InlineHook Weapon_SendToServerHook;
+
 WeaponModule *WeaponModule::getInstance() {
   static WeaponModule instance;
   return &instance;
+}
+void Weapon_SendToServerProxy(Item *item, Unity::System_String *name,
+                              Unity::il2cppArray<Unity::il2cppObject *> *args) {
+  if (WeaponModule::getInstance()->isEnabled()) {
+    if (name && name->ToString() == "ReloadServer") {
+      if (args && args->m_uMaxLength > 0) {
+        auto clazz = IL2CPP::Class::Find("System.Single");
+        if (clazz) {
+          float value = WeaponModule::getInstance()->reloadingTime;
+          args->operator[](0) = Unity::il2cppObject::BoxObject(clazz, &value);
+        } else {
+          WeaponModule::getInstance()->getLogger().error(
+              "failed to find System.Single class");
+        }
+      }
+    }
+  }
+
+  return Weapon_SendToServerHook.call(item, name, args);
 }
 
 void Weapon_UpdateProxy(Weapon *Weapon) {
@@ -54,6 +79,22 @@ std::optional<std::string> WeaponModule::load() {
   } else {
     Weapon_UpdateHook = std::move(result.value());
   }
+  void *SendToServer_Addr = IL2CPP::Class::Utils::GetMethodPointer(
+      "Akequ.Base.Item", "SendToServer", 2); // 2个参数
+  if (!SendToServer_Addr) {
+    getLogger().error("cannot get SendToServer_Addr");
+    return "Failed to get SendToServer address";
+  } else {
+    getLogger().info("SendToServer_Addr:{:p}", SendToServer_Addr);
+  }
+
+  // 创建并安装Hook
+  auto result1 = Weapon_SendToServerHook.create(SendToServer_Addr,
+                                                Weapon_SendToServerProxy);
+  if (!result) {
+    getLogger().error("Failed to create hook for SendToServer");
+    return "Hook creation failed";
+  }
   return std::nullopt;
 }
 
@@ -72,6 +113,7 @@ std::optional<std::string> WeaponModule::drawGUI() {
   ImGui::DragFloat("recoil", &recoil, 0.01, 0.01, 5);
   ImGui::DragFloat("spread", &spread, 0.01, 0.01, 5);
   ImGui::DragFloat("size_comp", &size_comp, 0.1, 0.01, 10);
+  ImGui::DragFloat("reloadingTime", &reloadingTime, 0.01, 0.01, 10);
   ImGui::Checkbox("auto_reload", &auto_reload);
   ImGui::Checkbox("canShoot", &canShoot);
   ImGui::Checkbox("isReloading", &isReloading);
@@ -89,6 +131,7 @@ std::optional<std::string> WeaponModule::toJson(nlohmann::json &json) const {
   json["isReloading"] = isReloading;
   json["anticheat"] = anticheat;
   json["friendlyFire"] = friendlyFire;
+  json["reloadingTime"] = reloadingTime;
   return std::nullopt;
 }
 std::optional<std::string> WeaponModule::fromJson(const nlohmann::json &json) {
@@ -137,6 +180,12 @@ std::optional<std::string> WeaponModule::fromJson(const nlohmann::json &json) {
   } else {
     return "Missing 'friendlyFire' in JSON";
   }
+  if (json.contains("reloadingTime") && json["reloadingTime"].is_number()) {
+    reloadingTime = json["reloadingTime"].get<float>();
+  } else {
+    return "Missing 'reloadingTime' in JSON";
+  }
+
   return std::nullopt;
 }
 REGISTER_MODULE(WeaponModule, WeaponModule::getInstance());

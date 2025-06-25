@@ -197,13 +197,25 @@ std::optional<std::string> BulletTraceModule::load() {
   //   return errMsg;
   // }
   // getLogger().info("BulletTraceModule: Weapon::Update hooked successfully.");
-  void *MoveNextAddr = IL2CPP::Class::Utils::GetMethodPointer(
-      "Akequ.Base.Weapon.<shootWait>d__42", "MoveNext", 0);
-  if (MoveNextAddr == nullptr) {
-    std::string errMsg =
-        "BulletTraceModule: Failed to find shootWait::MoveNext.";
-    getLogger().error(errMsg);
-    return errMsg;
+  static void *MoveNextAddr = nullptr;
+
+  if (!MoveNextAddr) {
+    std::vector<Unity::il2cppClass *> m_vClasses;
+    IL2CPP::Class::FetchClasses(&m_vClasses, "Assembly-CSharp", "");
+    for (auto &klass : m_vClasses) {
+      if (std::string(klass->m_pName) == "<shootWait>d__42") {
+        MoveNextAddr =
+            IL2CPP::Class::Utils::GetMethodPointer(klass, "MoveNext", 0);
+        if (MoveNextAddr != nullptr) {
+          break;
+        } else {
+          std::string errMsg =
+              "BulletTraceModule: Failed to find shootWait::MoveNext.";
+          getLogger().error(errMsg);
+          return errMsg;
+        }
+      }
+    }
   }
   shootWait_MoveNextHook =
       safetyhook::create_inline(MoveNextAddr, ShootWait_MoveNext_Hooked);
@@ -215,7 +227,7 @@ std::optional<std::string> BulletTraceModule::load() {
   }
   void *RayCastAddr = IL2CPP::Class::Utils::GetMethodPointer(
       "UnityEngine.Physics", "Raycast",
-      {"UnityEngine.Ray", "UnityEngine.RaycastHit&", "System.Single",
+      {"UnityEngine.Ray", "UnityEngine.RaycastHit", "System.Single",
        "System.Int32"});
   if (RayCastAddr == nullptr) {
     std::string errMsg = "BulletTraceModule: Failed to find Physics::Raycast.";
@@ -443,6 +455,6 @@ void BulletTraceModule::renderFov() {
                       aimFov, ImGui::ColorConvertFloat4ToU32(fovColor), 64,
                       1.0f);
 }
-REGISTER_MODULE(BulletTraceModule, BulletTraceModule::getInstance());
+// REGISTER_MODULE(BulletTraceModule, BulletTraceModule::getInstance());
 
 } // namespace zr
