@@ -1,6 +1,8 @@
 #pragma once
 
 #include "IL2CPPResolver/Unity/Structures/Quaternion.hpp"
+#include "IL2CPPResolver/Unity/Structures/Ray.hpp"
+#include "IL2CPPResolver/Unity/Structures/RaycastHit.hpp"
 #include "draw/draw.hpp"
 #include "draw/gui/window/windows/ModuleWindowType.hpp"
 #include "imgui.h"
@@ -26,8 +28,15 @@ private:
   ImVec4 fovColor{1.0f, 1.0f, 1.0f, 0.3f};
 
   // Hook
-  static safetyhook::InlineHook UpdateHook;
-  static void Weapon_Update_Hooked(Weapon *m_pWeapon);
+  // static safetyhook::InlineHook UpdateHook;
+  static safetyhook::InlineHook shootWait_MoveNextHook;
+  static safetyhook::InlineHook Physics_RayCastHook;
+  static bool Physics_RayCast_Hooked(Unity::Ray *ray,
+                                     Unity::RaycastHit &hitInfo,
+                                     float maxDistance, int32_t layerMask);
+  static bool ShootWait_MoveNext_Hooked(void *unknow_instance);
+  // static void Weapon_Update_Hooked(Weapon *m_pWeapon);
+  static std::atomic<bool> isInMoveNext;
   void renderFov();
   eventpp::CallbackList<void()>::Handle renderHandle;
 
