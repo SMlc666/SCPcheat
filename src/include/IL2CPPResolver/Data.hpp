@@ -39,6 +39,8 @@ struct Functions_t {
 
   void *m_FieldStaticGetValue = nullptr;
   void *m_FieldStaticSetValue = nullptr;
+
+  void *m_ValueBox = nullptr;
 };
 extern Functions_t Functions;
 } // namespace IL2CPP

@@ -29,7 +29,7 @@ public:
 
   bool WorldToScreen(Unity::Vector3 world, Vector2 &screen);
 
-  Ray *ScreenPointToRay(Vector3 pos);
+  Ray ScreenPointToRay(Vector2 &pos,int32_t eye);
 };
 
 namespace Camera {

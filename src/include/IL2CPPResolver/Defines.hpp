@@ -32,7 +32,7 @@
   IL2CPP_RStr("il2cpp_field_static_get_value")
 #define IL2CPP_FIELD_STATIC_SET_VALUE                                          \
   IL2CPP_RStr("il2cpp_field_static_set_value")
-
+#define IL2CPP_VALUE_BOX IL2CPP_RStr("il2cpp_value_box")
 // Calling Convention
 #ifdef _WIN64
 #define IL2CPP_CALLING_CONVENTION __fastcall *

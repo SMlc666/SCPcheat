@@ -4,7 +4,9 @@
 #include "IL2CPPResolver/IL2CPP_Resolver.hpp"
 #include "IL2CPPResolver/SystemTypeCache.hpp"
 #include "IL2CPPResolver/Unity/Defines.hpp"
+#include "IL2CPPResolver/Unity/Structures/Ray.hpp"
 #include "imgui.h"
+#include <cstdint>
 float Unity::CCamera::GetDepth() {
   return reinterpret_cast<float(UNITY_CALLING_CONVENTION)(void *)>(
       m_CameraFunctions.m_GetDepth)(this);
@@ -57,7 +59,7 @@ void Unity::Camera::Initialize() {
   m_CameraFunctions.m_WorldToScreen = IL2CPP::Class::Utils::GetMethodPointer(
       "UnityEngine.Camera", "WorldToScreenPoint_Injected", 4);
   m_CameraFunctions.m_ScreenPointToRay = IL2CPP::Class::Utils::GetMethodPointer(
-      "UnityEngine.Camera", "ScreenPointToRay", 1);
+      "UnityEngine.Camera", "ScreenPointToRay_Injected", 4);
 }
 Unity::CCamera *Unity::Camera::GetCurrent() {
   return reinterpret_cast<CCamera *(UNITY_CALLING_CONVENTION)()>(
@@ -67,8 +69,12 @@ Unity::CCamera *Unity::Camera::GetMain() {
   return reinterpret_cast<CCamera *(UNITY_CALLING_CONVENTION)()>(
       m_CameraFunctions.m_GetMain)();
 }
-Unity::Ray *Unity::CCamera::ScreenPointToRay(Vector3 pos) {
-  return reinterpret_cast<Ray *(UNITY_CALLING_CONVENTION)(void *, Vector3)>(
-      m_CameraFunctions.m_ScreenPointToRay)(this, pos);
+Unity::Ray Unity::CCamera::ScreenPointToRay(Vector2 &pos, int32_t eye) {
+  Unity::Ray ray;
+  reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void *, Vector2 &, int32_t,
+                                                  Unity::Ray &)>(
+      m_CameraFunctions.m_ScreenPointToRay)(this, pos, eye, ray);
+  return ray;
 }
+
 Unity::CameraFunctions_t Unity::m_CameraFunctions;

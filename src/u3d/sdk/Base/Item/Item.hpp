@@ -5,5 +5,6 @@ namespace zr {
 class Item : public Unity::CObject {
 public:
   Player *getPlayer();
+  
 };
 } // namespace zr

@@ -253,16 +253,35 @@ void *IL2CPP::Class::Utils::GetMethodPointer(
     }
 
     bool m_bMatch = true;
+
+    // 根据你的代码，选择一个分支进行修改
 #ifdef UNITY_VERSION_2022_3_8F1
     Unity::il2cppType **m_pCurrentParameterTypes = m_pMethod->m_pParameters;
     for (int i = 0; i < m_iNamesCount; ++i) {
       Unity::il2cppType *m_pCurrentParameterType = m_pCurrentParameterTypes[i];
       Unity::il2cppClass *m_pParamClass =
           ClassFromType(m_pCurrentParameterType);
-      if (!m_pParamClass || strcmp(m_pParamClass->m_pName, m_pNames[i]) != 0) {
+
+      if (!m_pParamClass) {
         m_bMatch = false;
         break;
       }
+
+      // --- 开始修改 ---
+      std::string paramFullName;
+      if (m_pParamClass->m_pNamespace &&
+          m_pParamClass->m_pNamespace[0] != '\0') {
+        paramFullName = std::string(m_pParamClass->m_pNamespace) + "." +
+                        m_pParamClass->m_pName;
+      } else {
+        paramFullName = m_pParamClass->m_pName;
+      }
+
+      if (paramFullName != m_pNames[i]) {
+        m_bMatch = false;
+        break;
+      }
+      // --- 结束修改 ---
     }
 #else
     Unity::il2cppParameterInfo *m_pCurrentParameters = m_pMethod->m_pParameters;
@@ -270,10 +289,27 @@ void *IL2CPP::Class::Utils::GetMethodPointer(
       Unity::il2cppType *m_pParamType =
           m_pCurrentParameters[i].m_pParameterType;
       Unity::il2cppClass *m_pParamClass = ClassFromType(m_pParamType);
-      if (!m_pParamClass || strcmp(m_pParamClass->m_pName, m_pNames[i]) != 0) {
+
+      if (!m_pParamClass) {
         m_bMatch = false;
         break;
       }
+
+      // --- 开始修改 ---
+      std::string paramFullName;
+      if (m_pParamClass->m_pNamespace &&
+          m_pParamClass->m_pNamespace[0] != '\0') {
+        paramFullName = std::string(m_pParamClass->m_pNamespace) + "." +
+                        m_pParamClass->m_pName;
+      } else {
+        paramFullName = m_pParamClass->m_pName;
+      }
+
+      if (paramFullName != m_pNames[i]) {
+        m_bMatch = false;
+        break;
+      }
+      // --- 结束修改 ---
     }
 #endif
 

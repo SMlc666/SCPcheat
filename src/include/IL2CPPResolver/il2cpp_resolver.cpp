@@ -98,6 +98,7 @@ bool IL2CPP::UnityAPI::Initialize() {
       {IL2CPP_CLASS_FROM_IL2CPP_TYPE, &Functions.m_ClassFromIl2cppType},
       {IL2CPP_FIELD_STATIC_GET_VALUE, &Functions.m_FieldStaticGetValue},
       {IL2CPP_FIELD_STATIC_SET_VALUE, &Functions.m_FieldStaticSetValue},
+      {IL2CPP_VALUE_BOX, &Functions.m_ValueBox}
   };
 
   for (auto &m_ExportPair : m_ExportMap) {

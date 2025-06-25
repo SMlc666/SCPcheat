@@ -34,9 +34,9 @@ bool Raycast(Vector3 origin, Vector3 direction, float maxDistance,
   if (!method) {
     return false;
   }
-  return reinterpret_cast<bool(UNITY_CALLING_CONVENTION)(Vector3, Vector3, float,
-                                                         int)>(method)(
-      origin, direction, maxDistance, layerMask);
+  return reinterpret_cast<bool(UNITY_CALLING_CONVENTION)(
+      Vector3, Vector3, float, int)>(method)(origin, direction, maxDistance,
+                                             layerMask);
 }
 
 bool Raycast(Vector3 origin, Vector3 direction, float maxDistance) {
@@ -49,9 +49,8 @@ bool Raycast(Vector3 origin, Vector3 direction, float maxDistance) {
   if (!method) {
     return false;
   }
-  return reinterpret_cast<bool(UNITY_CALLING_CONVENTION)(Vector3, Vector3,
-                                                         float)>(method)(
-      origin, direction, maxDistance);
+  return reinterpret_cast<bool(UNITY_CALLING_CONVENTION)(
+      Vector3, Vector3, float)>(method)(origin, direction, maxDistance);
 }
 
 bool Raycast(Vector3 origin, Vector3 direction) {
@@ -75,8 +74,8 @@ bool Raycast(Vector3 origin, Vector3 direction, RaycastHit &hitInfo,
   if (!method) {
     method = IL2CPP::Class::Utils::GetMethodPointer(
         "UnityEngine.Physics", "Raycast",
-        {"UnityEngine.Vector3", "UnityEngine.Vector3",
-         "UnityEngine.RaycastHit&", "System.Single", "System.Int32",
+        {"UnityEngine.Vector3", "UnityEngine.Vector3", "UnityEngine.RaycastHit",
+         "System.Single", "System.Int32",
          "UnityEngine.QueryTriggerInteraction"});
   }
   if (!method) {
@@ -94,8 +93,8 @@ bool Raycast(Vector3 origin, Vector3 direction, RaycastHit &hitInfo,
   if (!method) {
     method = IL2CPP::Class::Utils::GetMethodPointer(
         "UnityEngine.Physics", "Raycast",
-        {"UnityEngine.Vector3", "UnityEngine.Vector3",
-         "UnityEngine.RaycastHit&", "System.Single", "System.Int32"});
+        {"UnityEngine.Vector3", "UnityEngine.Vector3", "UnityEngine.RaycastHit",
+         "System.Single", "System.Int32"});
   }
   if (!method) {
     return false;
@@ -111,15 +110,15 @@ bool Raycast(Vector3 origin, Vector3 direction, RaycastHit &hitInfo,
   if (!method) {
     method = IL2CPP::Class::Utils::GetMethodPointer(
         "UnityEngine.Physics", "Raycast",
-        {"UnityEngine.Vector3", "UnityEngine.Vector3",
-         "UnityEngine.RaycastHit&", "System.Single"});
+        {"UnityEngine.Vector3", "UnityEngine.Vector3", "UnityEngine.RaycastHit",
+         "System.Single"});
   }
   if (!method) {
     return false;
   }
   return reinterpret_cast<bool(UNITY_CALLING_CONVENTION)(
       Vector3, Vector3, RaycastHit *, float)>(method)(origin, direction,
-                                                     &hitInfo, maxDistance);
+                                                      &hitInfo, maxDistance);
 }
 
 bool Raycast(Vector3 origin, Vector3 direction, RaycastHit &hitInfo) {
@@ -128,14 +127,13 @@ bool Raycast(Vector3 origin, Vector3 direction, RaycastHit &hitInfo) {
     method = IL2CPP::Class::Utils::GetMethodPointer(
         "UnityEngine.Physics", "Raycast",
         {"UnityEngine.Vector3", "UnityEngine.Vector3",
-         "UnityEngine.RaycastHit&"});
+         "UnityEngine.RaycastHit"});
   }
   if (!method) {
     return false;
   }
-  return reinterpret_cast<bool(UNITY_CALLING_CONVENTION)(Vector3, Vector3,
-                                                         RaycastHit *)>(method)(
-      origin, direction, &hitInfo);
+  return reinterpret_cast<bool(UNITY_CALLING_CONVENTION)(
+      Vector3, Vector3, RaycastHit *)>(method)(origin, direction, &hitInfo);
 }
 
 bool Raycast(Ray ray, float maxDistance, int layerMask,
@@ -185,8 +183,8 @@ bool Raycast(Ray ray, float maxDistance) {
 bool Raycast(Ray ray) {
   static void *method = nullptr;
   if (!method) {
-    method = IL2CPP::Class::Utils::GetMethodPointer("UnityEngine.Physics",
-                                                    "Raycast", {"UnityEngine.Ray"});
+    method = IL2CPP::Class::Utils::GetMethodPointer(
+        "UnityEngine.Physics", "Raycast", {"UnityEngine.Ray"});
   }
   if (!method) {
     return false;
@@ -200,7 +198,7 @@ bool Raycast(Ray ray, RaycastHit &hitInfo, float maxDistance, int layerMask,
   if (!method) {
     method = IL2CPP::Class::Utils::GetMethodPointer(
         "UnityEngine.Physics", "Raycast",
-        {"UnityEngine.Ray", "UnityEngine.RaycastHit&", "System.Single",
+        {"UnityEngine.Ray", "UnityEngine.RaycastHit", "System.Single",
          "System.Int32", "UnityEngine.QueryTriggerInteraction"});
   }
   if (!method) {
@@ -216,7 +214,7 @@ bool Raycast(Ray ray, RaycastHit &hitInfo, float maxDistance, int layerMask) {
   if (!method) {
     method = IL2CPP::Class::Utils::GetMethodPointer(
         "UnityEngine.Physics", "Raycast",
-        {"UnityEngine.Ray", "UnityEngine.RaycastHit&", "System.Single",
+        {"UnityEngine.Ray", "UnityEngine.RaycastHit", "System.Single",
          "System.Int32"});
   }
   if (!method) {
@@ -224,7 +222,7 @@ bool Raycast(Ray ray, RaycastHit &hitInfo, float maxDistance, int layerMask) {
   }
   return reinterpret_cast<bool(UNITY_CALLING_CONVENTION)(
       Ray, RaycastHit *, float, int)>(method)(ray, &hitInfo, maxDistance,
-                                             layerMask);
+                                              layerMask);
 }
 
 bool Raycast(Ray ray, RaycastHit &hitInfo, float maxDistance) {
@@ -232,14 +230,13 @@ bool Raycast(Ray ray, RaycastHit &hitInfo, float maxDistance) {
   if (!method) {
     method = IL2CPP::Class::Utils::GetMethodPointer(
         "UnityEngine.Physics", "Raycast",
-        {"UnityEngine.Ray", "UnityEngine.RaycastHit&", "System.Single"});
+        {"UnityEngine.Ray", "UnityEngine.RaycastHit", "System.Single"});
   }
   if (!method) {
     return false;
   }
-  return reinterpret_cast<bool(UNITY_CALLING_CONVENTION)(Ray, RaycastHit *,
-                                                         float)>(method)(
-      ray, &hitInfo, maxDistance);
+  return reinterpret_cast<bool(UNITY_CALLING_CONVENTION)(
+      Ray, RaycastHit *, float)>(method)(ray, &hitInfo, maxDistance);
 }
 
 bool Raycast(Ray ray, RaycastHit &hitInfo) {
@@ -247,7 +244,7 @@ bool Raycast(Ray ray, RaycastHit &hitInfo) {
   if (!method) {
     method = IL2CPP::Class::Utils::GetMethodPointer(
         "UnityEngine.Physics", "Raycast",
-        {"UnityEngine.Ray", "UnityEngine.RaycastHit&"});
+        {"UnityEngine.Ray", "UnityEngine.RaycastHit"});
   }
   if (!method) {
     return false;

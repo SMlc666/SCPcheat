@@ -19,6 +19,7 @@ struct TransformFunctions_t {
   void *m_SetRotation = nullptr;
   void *m_SetLocalPosition = nullptr;
   void *m_SetLocalScale = nullptr;
+  void *m_GetForward = nullptr;
 };
 extern TransformFunctions_t m_TransformFunctions;
 
@@ -52,6 +53,8 @@ public:
   void SetLocalPosition(Vector3 m_vVector);
 
   void SetLocalScale(Vector3 m_vVector);
+
+  Vector3 GetForward();
 };
 
 namespace Transform {

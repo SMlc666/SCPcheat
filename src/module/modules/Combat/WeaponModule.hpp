@@ -16,6 +16,7 @@ public:
   float recoil = 0;
   float spread = 0;
   float size_comp = 1;
+  float reloadingTime = 0.1;
   bool auto_reload = false;
   bool canShoot = true;
   bool isReloading = false;

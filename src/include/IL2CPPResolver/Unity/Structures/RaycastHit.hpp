@@ -2,6 +2,7 @@
 
 #include "IL2CPPResolver/API/Class.hpp"
 #include "IL2CPPResolver/Unity/Structures/Vector3.hpp"
+#include "IL2CPPResolver/Unity/Structures/il2cpp.hpp"
 #include <cstdint>
 #include <fmt/core.h> // 包含 fmt 库头文件
 namespace Unity {
@@ -22,15 +23,18 @@ struct RaycastHit {
   }
 };
 void *RaycastHit::GetCollider() const {
-  if (!m_Collider || (uintptr_t)m_Collider < 0)
-    return {};
-  static void *(*FromId)(int){};
-  if (!FromId) {
-    FromId = (decltype(FromId))IL2CPP::Class::Utils::GetMethodPointer(
-        "UnityEngine.Object", "FindObjectFromInstanceID", 1);
+  if (!m_Collider) {
+    return nullptr;
   }
-  auto gcHandle = (long)FromId(m_Collider);
-  gcHandle = gcHandle & ~(long)1;
-  return (void *)gcHandle;
+  static void *get_colliderPtr = nullptr;
+  if (!get_colliderPtr) {
+    get_colliderPtr = IL2CPP::Class::Utils::GetMethodPointer(
+        "UnityEngine.RaycastHit", "get_collider", 0);
+  }
+  if (!get_colliderPtr) {
+    return nullptr;
+  }
+  return reinterpret_cast<void *(UNITY_CALLING_CONVENTION)(void *)>(
+      get_colliderPtr)((void *)this);
 }
 } // namespace Unity
