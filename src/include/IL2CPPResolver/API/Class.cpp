@@ -1,5 +1,7 @@
 #include "Class.hpp"
 #include "IL2CPPResolver/API/Domain.hpp"
+#include "IL2CPPResolver/Data.hpp"
+#include "IL2CPPResolver/Unity/Structures/il2cpp.hpp"
 #include <cstring>
 #include <fmt/core.h>
 
@@ -59,6 +61,24 @@ Unity::il2cppClass *IL2CPP::Class::GetFromName(Unity::il2cppImage *m_pImage,
   return reinterpret_cast<Unity::il2cppClass *(
       IL2CPP_CALLING_CONVENTION)(void *, const char *, const char *)>(
       Functions.m_ClassFromName)(m_pImage, m_pNamespace, m_pName);
+}
+Unity::il2cppClass *TryGetClassInImage(Unity::il2cppImage *m_pImage,
+                                       const std::string_view &m_pNamespace,
+                                       const std::string_view &m_pName) {
+  if (IL2CPP::Functions.m_ImageGetClass) {
+    size_t typeCount = m_pImage->m_uTypeCount;
+    for (size_t i = 0; i < typeCount; ++i) {
+      auto cls = reinterpret_cast<Unity::il2cppClass *(
+          IL2CPP_CALLING_CONVENTION)(Unity::il2cppImage *, unsigned int)>(
+          IL2CPP::Functions.m_ImageGetClass)(m_pImage, i);
+      if (cls->m_pDeclareClass ||
+          !cls->flags && strcmp(cls->m_pName, "<Module>") == 0)
+        continue;
+      if (m_pNamespace == cls->m_pNamespace && m_pName == cls->m_pName)
+        return cls;
+    }
+  }
+  return nullptr;
 }
 Unity::il2cppClass *IL2CPP::Class::Find(const char *m_pName) {
   size_t m_sAssembliesCount = 0U;

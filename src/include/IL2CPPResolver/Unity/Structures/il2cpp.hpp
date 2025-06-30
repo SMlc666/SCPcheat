@@ -4,9 +4,12 @@
 #include "IL2CPPResolver/Defines.hpp"
 #include <cstdint>
 namespace Unity {
+struct il2cppAssembly;
 struct il2cppImage {
   const char *m_pName;
   const char *m_pNameNoExt;
+  il2cppAssembly *m_pAssembly;
+  uint32_t m_uTypeCount;
 };
 
 struct il2cppAssemblyName {
@@ -55,6 +58,26 @@ struct il2cppClass {
   void *m_pInterfaceOffsets;
   void *m_pStaticFields;
   void *m_pRGCTX;
+  struct Il2CppClass **typeHierarchy;
+  void *unity_user_data;
+  void *initializationExceptionGCHandle;
+  uint32_t cctor_started;
+  uint32_t cctor_finished_or_no_cctor;
+  __declspec(align(8)) size_t cctor_thread;
+  void *genericContainerHandle;
+  uint32_t instance_size;
+  uint32_t stack_slot_size;
+  uint32_t actualSize;
+  uint32_t element_size;
+  int32_t native_size;
+  uint32_t static_fields_size;
+  uint32_t thread_static_fields_size;
+  int32_t thread_static_fields_offset;
+  uint32_t flags;
+
+  inline void* NewArray(uintptr_t size) {
+    return reinterpret_cast<void*(IL2CPP_CALLING_CONVENTION)(il2cppClass*, uintptr_t)>(IL2CPP::Functions.m_ArrayNew)(this, size);
+  }
 };
 
 struct il2cppObject {

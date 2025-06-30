@@ -28,7 +28,9 @@ Unity::il2cppObject *GetSystemType(Unity::il2cppClass *m_pClass);
 
 Unity::il2cppClass *GetFromName(Unity::il2cppImage *m_pImage,
                                 const char *m_pNamespace, const char *m_pName);
-
+Unity::il2cppClass *TryGetClassInImage(Unity::il2cppImage *m_pImage,
+                                       const std::string_view &m_pNamespace,
+                                       const std::string_view &m_pName);
 Unity::il2cppClass *Find(const char *m_pName);
 
 Unity::il2cppObject *GetSystemType(const char *m_pClassName);
@@ -69,13 +71,13 @@ void *GetMethodPointer(const char *m_pClassName, const char *m_pMethodName,
                        std::initializer_list<const char *> m_vNames);
 
 void *GetMethodPointer(Unity::il2cppClass *m_pClass, const char *m_pMethodName,
-                      std::initializer_list<const char *> m_vNames);
+                       std::initializer_list<const char *> m_vNames);
 
 void *GetMethodPointer(const char *m_pClassName, const char *m_pMethodName,
-                      const std::vector<const char *> &m_vNames);
+                       const std::vector<const char *> &m_vNames);
 
 void *GetMethodPointer(Unity::il2cppClass *m_pClass, const char *m_pMethodName,
-                      const std::vector<const char *> &m_vNames);
+                       const std::vector<const char *> &m_vNames);
 
 Unity::il2cppClass *FilterClass(std::vector<Unity::il2cppClass *> *m_pClasses,
                                 std::initializer_list<const char *> m_vNames,
