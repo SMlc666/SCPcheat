@@ -10,6 +10,7 @@ namespace Unity {
 struct ComponentFunctions_t {
   void *m_GetGameObject = nullptr;
   void *m_GetTransform = nullptr;
+  void *m_GetComponent = nullptr;
 };
 extern ComponentFunctions_t m_ComponentFunctions;
 
@@ -18,6 +19,7 @@ public:
   CGameObject *GetGameObject();
 
   CTransform *GetTransform();
+  CComponent *getComponent(const char *m_pComponentTypeName);
 };
 
 namespace Component {

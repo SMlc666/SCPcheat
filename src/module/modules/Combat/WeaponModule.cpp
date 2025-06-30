@@ -1,7 +1,11 @@
 #include "WeaponModule.hpp"
 #include "IL2CPPResolver/API/Class.hpp"
 #include "IL2CPPResolver/API/String.hpp"
+#include "IL2CPPResolver/Unity/API/Camera.hpp"
+#include "IL2CPPResolver/Unity/API/Physics.hpp"
 #include "IL2CPPResolver/Unity/API/Transform.hpp"
+#include "IL2CPPResolver/Unity/Structures/Ray.hpp"
+#include "IL2CPPResolver/Unity/Structures/RaycastHit.hpp"
 #include "IL2CPPResolver/Unity/Structures/System_String.hpp"
 #include "IL2CPPResolver/Unity/Structures/Vector3.hpp"
 #include "IL2CPPResolver/Unity/Structures/il2cpp.hpp"
@@ -9,12 +13,15 @@
 #include "imgui.h"
 #include "module/ModuleRegistrar.hpp"
 #include "safetyhook/inline_hook.hpp"
+#include "u3d/sdk/Actor/Collider/Collider.hpp"
+#include "u3d/sdk/Actor/Player/HitBox.hpp"
 #include "u3d/sdk/Actor/Player/LocalPlayer.hpp"
 #include "u3d/sdk/Base/Item/Item.hpp"
 #include "u3d/sdk/Base/Item/Weapon/Weapon.hpp"
 #include <cstdint>
 #include <mutex>
 #include <optional>
+#include <random>
 
 namespace zr {
 safetyhook::InlineHook Weapon_UpdateHook;
@@ -123,26 +130,173 @@ void Weapon_UpdateProxy(Weapon *Weapon) {
     }
     if (WeaponModule::getInstance()->autoAttack &&
         !WeaponModule::getInstance()->spoofYourAttack) {
-      static auto clazz = IL2CPP::Class::Find("System.Int16");
-      static auto clazz1 = IL2CPP::Class::Find("UnityEngine.Vector3");
-      if (clazz && clazz1) {
-        auto players = Player::getAllPlayers();
-        for (auto player : players) {
-          auto args = std::vector<Unity::il2cppObject *>(2);
-          int16_t playerID = player->getPlayerID();
-          Unity::Vector3 direction = {0, 0, 0};
-          args[0] = Unity::il2cppObject::BoxObject(clazz, &playerID);
-          args[1] = Unity::il2cppObject::BoxObject(clazz1, &direction);
-          for (int i = 0; i < WeaponModule::getInstance()->attackCount; i++) {
-            Weapon->sendToServer("ShootServer", args);
+      auto instance = WeaponModule::getInstance();
+      instance->frameCounter++;
+      if (instance->frameCounter >= instance->attackInterval) {
+        instance->frameCounter = 0;
+
+        static auto int16Class = IL2CPP::Class::Find("System.Int16");
+        static auto vector3Class = IL2CPP::Class::Find("UnityEngine.Vector3");
+        if (int16Class && vector3Class) {
+          auto localPlayer = LocalPlayer::getInstance();
+          if (localPlayer && localPlayer->isInit()) {
+            auto localTransform = localPlayer->GetTransform();
+            auto localPlayerClass = localPlayer->getPlayerClass();
+            if (localTransform && localPlayerClass) {
+              Unity::Vector3 localPos = localTransform->GetPosition();
+              std::string localTeamID = localPlayerClass->getTeamID();
+
+              auto players = Player::getAllPlayers();
+              std::vector<Player *> validTargets;
+
+              for (auto &player : players) {
+                if (!player || player == localPlayer || !player->isInit() ||
+                    player->getHealth() <= 0) {
+                  continue;
+                }
+
+                auto targetPlayerClass = player->getPlayerClass();
+                if (!targetPlayerClass) {
+                  continue;
+                }
+
+                std::string targetTeamID = targetPlayerClass->getTeamID();
+                if (targetTeamID == localTeamID ||
+                    targetTeamID.find("Spectator") != std::string::npos) {
+                  continue;
+                }
+
+                if (instance->ignoreClassD &&
+                    player->getClassName() == "ClassD") {
+                  continue;
+                }
+
+                if (instance->ignoreSCP999 &&
+                    player->getClassName() == "SCP999") {
+                  continue;
+                }
+
+                auto targetTransform = player->GetTransform();
+                if (!targetTransform) {
+                  continue;
+                }
+
+                Unity::Vector3 targetPos = targetTransform->GetPosition();
+                float distance = Unity::Vector3::Distance(localPos, targetPos);
+
+                if (distance <= instance->attackRange) {
+                  if (instance->raycast) {
+                    Unity::RaycastHit hitInfo;
+                    auto mainCamera = Unity::Camera::GetMain();
+                    if (!mainCamera)
+                      continue;
+                    auto cameraTransform = mainCamera->GetTransform();
+                    if (!cameraTransform) {
+                      continue;
+                    }
+                    Unity::Vector3 origin = cameraTransform->GetPosition();
+                    Unity::Vector3 direction =
+                        (targetPos - origin).normalized();
+                    Unity::Ray ray(origin, direction);
+                    int shootLayer = Weapon->getShootLayer();
+
+                    if (Unity::Physics::Raycast(
+                            ray, hitInfo, instance->attackRange, shootLayer)) {
+                      auto collider = reinterpret_cast<zr::Collider *>(
+                          hitInfo.GetCollider());
+                      if (!collider) {
+                        continue;
+                      }
+
+                      auto hitBox = reinterpret_cast<zr::HitBox *>(
+                          collider->getComponent("HitBox"));
+
+                      if (!hitBox || hitBox->getPlayer() != player) {
+                        continue;
+                      }
+                    } else {
+                      continue;
+                    }
+                  }
+                  validTargets.push_back(player);
+                }
+              }
+
+              // 攻击逻辑
+              if (!validTargets.empty()) {
+                if (instance->attackMode == AutoAttackMode::Multi) {
+                  for (auto &target : validTargets) {
+                    auto args = std::vector<Unity::il2cppObject *>(2);
+                    int16_t playerID = target->getPlayerID();
+                    Unity::Vector3 direction = {0, 0, 0};
+                    args[0] =
+                        Unity::il2cppObject::BoxObject(int16Class, &playerID);
+                    args[1] = Unity::il2cppObject::BoxObject(vector3Class,
+                                                             &direction);
+                    for (int i = 0; i < instance->attackCount; i++) {
+                      static std::random_device rd;
+                      static std::mt19937 gen(rd());
+                      static std::uniform_real_distribution<float> dis(0.0f,
+                                                                       1.0f);
+                      if (dis(gen) >= instance->attackFailChance) {
+                        Weapon->sendToServer("ShootServer", args);
+                      }
+                    }
+                  }
+                } else { // Single mode
+                  Player *bestTarget = nullptr;
+                  float bestValue = std::numeric_limits<float>::max();
+
+                  if (instance->attackPriority ==
+                      AutoAttackPriority::Distance) {
+                    for (auto &target : validTargets) {
+                      float distance = Unity::Vector3::Distance(
+                          localPos, target->GetTransform()->GetPosition());
+                      if (distance < bestValue) {
+                        bestValue = distance;
+                        bestTarget = target;
+                      }
+                    }
+                  } else { // Health
+                    for (auto &target : validTargets) {
+                      if (target->getHealth() < bestValue) {
+                        bestValue = target->getHealth();
+                        bestTarget = target;
+                      }
+                    }
+                  }
+
+                  if (bestTarget) {
+                    auto args = std::vector<Unity::il2cppObject *>(2);
+                    int16_t playerID = bestTarget->getPlayerID();
+                    Unity::Vector3 direction = {0, 0, 0};
+                    args[0] =
+                        Unity::il2cppObject::BoxObject(int16Class, &playerID);
+                    args[1] = Unity::il2cppObject::BoxObject(vector3Class,
+                                                             &direction);
+                    for (int i = 0; i < instance->attackCount; i++) {
+                      static std::random_device rd;
+                      static std::mt19937 gen(rd());
+                      static std::uniform_real_distribution<float> dis(0.0f,
+                                                                       1.0f);
+                      if (dis(gen) >= instance->attackFailChance) {
+                        Weapon->sendToServer("ShootServer", args);
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
+        } else {
+          std::once_flag flag;
+          std::call_once(flag, [&]() {
+            WeaponModule::getInstance()->getLogger().error(
+                "Failed to find System.Int16 class or "
+                "UnityEngine.Vector3 "
+                "class");
+          });
         }
-      } else {
-        std::once_flag flag;
-        std::call_once(flag, [&]() {
-          WeaponModule::getInstance()->getLogger().error(
-              "Failed to find System.Int16 class or UnityEngine.Vector3 class");
-        });
       }
     }
   }
@@ -233,7 +387,32 @@ std::optional<std::string> WeaponModule::drawGUI() {
   ImGui::Checkbox("friendlyFire", &friendlyFire);
   ImGui::Checkbox("infiniteAmmo", &infiniteAmmo);
   ImGui::Checkbox("autoAttack", &autoAttack);
-  ImGui::SliderInt("attackCount", &attackCount, 1, 300);
+  if (autoAttack) {
+    ImGui::SliderFloat("Attack Range", &attackRange, 1.0f, 300.0f, "%.1f");
+    ImGui::SliderInt("Attack Interval (frames)", &attackInterval, 1, 1000);
+    ImGui::SliderInt("attackCount", &attackCount, 1, 300);
+    ImGui::SliderFloat("Attack Fail Chance", &attackFailChance, 0.0f, 1.0f,
+                       "%.2f");
+
+    const char *attackModes[] = {"Single", "Multi"};
+    int currentMode = static_cast<int>(attackMode);
+    if (ImGui::Combo("Attack Mode", &currentMode, attackModes,
+                     IM_ARRAYSIZE(attackModes))) {
+      attackMode = static_cast<AutoAttackMode>(currentMode);
+    }
+
+    if (attackMode == AutoAttackMode::Single) {
+      const char *priorities[] = {"Distance", "Health"};
+      int currentPriority = static_cast<int>(attackPriority);
+      if (ImGui::Combo("Priority", &currentPriority, priorities,
+                       IM_ARRAYSIZE(priorities))) {
+        attackPriority = static_cast<AutoAttackPriority>(currentPriority);
+      }
+    }
+    ImGui::Checkbox("Raycast", &raycast);
+    ImGui::Checkbox("Ignore ClassD", &ignoreClassD);
+    ImGui::Checkbox("Ignore SCP999", &ignoreSCP999);
+  }
   ImGui::Checkbox("spoofYourAttack", &spoofYourAttack);
   ImGui::Checkbox("superBullet", &superBullet);
   ImGui::SliderInt("bulletCount", &bulletCount, 1, 100);
@@ -252,6 +431,14 @@ std::optional<std::string> WeaponModule::toJson(nlohmann::json &json) const {
   json["infiniteAmmo"] = infiniteAmmo;
   json["autoAttack"] = autoAttack;
   json["attackCount"] = attackCount;
+  json["attackRange"] = attackRange;
+  json["attackInterval"] = attackInterval;
+  json["attackMode"] = static_cast<int>(attackMode);
+  json["attackPriority"] = static_cast<int>(attackPriority);
+  json["ignoreClassD"] = ignoreClassD;
+  json["ignoreSCP999"] = ignoreSCP999;
+  json["raycast"] = raycast;
+  json["attackFailChance"] = attackFailChance;
   json["spoofYourAttack"] = spoofYourAttack;
   json["superBullet"] = superBullet;
   json["bulletCount"] = bulletCount;
@@ -319,6 +506,16 @@ std::optional<std::string> WeaponModule::fromJson(const nlohmann::json &json) {
   } else {
     return "Missing 'attackCount' in JSON";
   }
+  attackRange = json.value("attackRange", 15.0f);
+  attackInterval = json.value("attackInterval", 10);
+  attackMode = static_cast<AutoAttackMode>(
+      json.value("attackMode", 1)); // Default to Multi
+  attackPriority = static_cast<AutoAttackPriority>(
+      json.value("attackPriority", 0)); // Default to Distance
+  ignoreClassD = json.value("ignoreClassD", true);
+  ignoreSCP999 = json.value("ignoreSCP999", true);
+  raycast = json.value("raycast", false);
+  attackFailChance = json.value("attackFailChance", 0.0f);
   if (json.contains("spoofYourAttack") &&
       json["spoofYourAttack"].is_boolean()) {
     spoofYourAttack = json["spoofYourAttack"].get<bool>();

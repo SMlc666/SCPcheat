@@ -71,9 +71,9 @@ Unity::CCamera *Unity::Camera::GetMain() {
 }
 Unity::Ray Unity::CCamera::ScreenPointToRay(Vector2 &pos, int32_t eye) {
   Unity::Ray ray;
-  reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void *, Vector2 &, int32_t,
-                                                  Unity::Ray &)>(
-      m_CameraFunctions.m_ScreenPointToRay)(this, pos, eye, ray);
+  reinterpret_cast<void(UNITY_CALLING_CONVENTION)(void *, Vector2 *, int32_t,
+                                                  Unity::Ray *)>(
+      m_CameraFunctions.m_ScreenPointToRay)(this, &pos, eye, &ray);
   return ray;
 }
 

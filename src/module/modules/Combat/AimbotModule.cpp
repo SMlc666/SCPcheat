@@ -15,6 +15,7 @@
 #include "u3d/sdk/Actor/Player/Player.hpp"
 #include "u3d/sdk/Base/Item/Weapon/Weapon.hpp"
 #include "u3d/sdk/Control/FirstPersonController.hpp"
+#include "u3d/sdk/Actor/Player/HitBox.hpp"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -213,6 +214,35 @@ void AimbotModule::onWeaponShoot(Weapon *weapon) {
         continue;
       }
 
+      if (raycast) {
+        Unity::RaycastHit hitInfo;
+        auto cameraTransform = mainCamera->GetTransform();
+        if (!cameraTransform) {
+          continue;
+        }
+        Unity::Vector3 origin = cameraTransform->GetPosition();
+        Unity::Vector3 direction = (playerPosition - origin).normalized();
+        Unity::Ray ray(origin, direction);
+        int shootLayer = weapon->getShootLayer();
+
+        if (Unity::Physics::Raycast(ray, hitInfo, maxDistance, shootLayer)) {
+          auto collider =
+              reinterpret_cast<zr::Collider *>(hitInfo.GetCollider());
+          if (!collider) {
+            continue;
+          }
+
+          auto hitBox =
+              reinterpret_cast<zr::HitBox *>(collider->getComponent("HitBox"));
+
+          if (!hitBox || hitBox->getPlayer() != player) {
+            continue;
+          }
+        } else {
+          continue;
+        }
+      }
+
       if (aimPriority == AimPriority::Distance) {
         float distance = Unity::Vector3::Distance(
             localPlayer->GetTransform()->GetPosition(), playerPosition);
@@ -229,58 +259,6 @@ void AimbotModule::onWeaponShoot(Weapon *weapon) {
         if (distanceToCenter < closestValue) {
           closestValue = distanceToCenter;
           bestTarget = player;
-        }
-      }
-      if (raycast) {
-
-        auto cameraTransform = mainCamera->GetTransform();
-        if (!cameraTransform)
-          continue; // 确保相机Transform有效
-
-        Unity::Vector3 rayOrigin = cameraTransform->GetPosition();
-        Unity::Vector3 rayDirection =
-            cameraTransform->GetForward(); // 相机正前方方向
-
-        Unity::RaycastHit hitInfo;
-        int32_t shootLayer = weapon->getShootLayer();
-
-        if (Unity::Physics::Raycast(rayOrigin, rayDirection, hitInfo,
-                                    maxDistance, shootLayer)) {
-          auto hitCollider = hitInfo.GetCollider();
-          if (!hitCollider) {
-            continue;
-          }
-
-          auto hitObject = ((Collider *)hitCollider)->GetGameObject();
-          if (!hitObject) {
-            continue;
-          }
-
-          auto playerObject = player->GetGameObject();
-          if (!playerObject) {
-            continue;
-          }
-
-          auto hitTransform = hitObject->GetTransform();
-          if (!hitTransform) {
-            continue;
-          }
-          auto hitRootObjectTransform = hitTransform->GetRoot();
-          if (!hitRootObjectTransform) {
-            continue;
-          }
-
-          auto hitRootObject = hitRootObjectTransform->GetGameObject();
-          if (!hitRootObject) {
-            continue;
-          }
-
-          if (hitRootObject != playerObject) {
-            continue;
-          }
-        } else {
-          continue; // Nothing hit, target is likely too far or not in line of
-                    // sight
         }
       }
     }
