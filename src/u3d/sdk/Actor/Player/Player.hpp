@@ -29,5 +29,8 @@ public:
   FirstPersonController *getFirstPersonController();
   PositionControllerAC *getPositionControllerAC();
   CapsuleCollider *getCapsuleCollider();
+  int16_t getPlayerID();
+  void syncAccount(int64_t id, const std::string &name, const std::string &tag,
+                   const std::string &platform);
 };
 } // namespace zr

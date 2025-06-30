@@ -1,4 +1,5 @@
 #include "Player.hpp"
+#include "IL2CPPResolver/API/String.hpp"
 #include "IL2CPPResolver/Unity/API/GameObject.hpp"
 #include "IL2CPPResolver/Unity/API/Object.hpp"
 #include "IL2CPPResolver/Unity/Defines.hpp"
@@ -94,4 +95,13 @@ std::vector<zr::AmmoData *> zr::Player::getAmmoData() {
 zr::CapsuleCollider *zr::Player::getCapsuleCollider() {
   return static_cast<CapsuleCollider *>(
       GetGameObject()->GetComponent("UnityEngine.CapsuleCollider"));
+}
+int16_t zr::Player::getPlayerID() {
+  return GetMemberValue<int16_t>("playerId");
+}
+void zr::Player::syncAccount(int64_t id, const std::string &name,
+                             const std::string &tag,
+                             const std::string &platform) {
+  CallMethod<void>("SyncAccount", id, IL2CPP::String::New(name),
+                   IL2CPP::String::New(tag), IL2CPP::String::New(platform));
 }

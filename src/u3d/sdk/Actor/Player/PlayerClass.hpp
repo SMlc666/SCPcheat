@@ -13,5 +13,7 @@ public:
   std::string getHand();
   std::string getTeamID();
   std::string getClassColor();
+  void sendToServer(const std::string &func,
+                    const std::vector<Unity::il2cppObject *> &args);
 };
 } // namespace zr
