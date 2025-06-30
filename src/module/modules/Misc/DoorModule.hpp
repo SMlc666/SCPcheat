@@ -1,19 +1,18 @@
 #pragma once
-
 #include "module/module.hpp"
 #include "u3d/sdk/PlayerUpdate.hpp"
 #include <optional>
 #include <string>
+
 namespace zr {
-class BypassModule : public Module {
+class DoorModule : public Module {
 public:
-  bool isDebug = false;
-  bool randomDeviceID = true;
-  bool alwaysRandomAccount = true;
-  bool spoofAndroid = false;
-  PlayerUpdateCallbackList::Handle playerUpdateCallbacksHandle;
-  BypassModule() : Module("BypassModule", ModuleWindowType::MISC) {}
-  static BypassModule *getInstance();
+  bool always_open = false;
+  bool always_break = false;
+  bool usingClientBreak = false;
+  PlayerUpdateCallbackList::Handle updatehandle;
+  DoorModule() : Module("DoorModule", ModuleWindowType::MISC) {}
+  static DoorModule *getInstance();
   std::optional<std::string> load() override;
   std::optional<std::string> enable() override;
   std::optional<std::string> disable() override;

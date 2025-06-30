@@ -26,6 +26,7 @@ private:
   bool ignoreSCP999 = true;
   float maxDistance = 300.0f;
   bool raycast = true;
+  
   WeaponDoShootCallbackList::Handle weaponShootHandle;
   eventpp::CallbackList<void()>::Handle renderHandle;
 
