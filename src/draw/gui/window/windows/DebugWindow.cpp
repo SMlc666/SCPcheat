@@ -3,6 +3,7 @@
 #include "IL2CPPResolver/API/Class.hpp"
 
 #include "IL2CPPResolver/API/Domain.hpp"
+#include "IL2CPPResolver/API/String.hpp"
 #include "IL2CPPResolver/API/Thread.hpp"
 #include "IL2CPPResolver/Unity/API/Camera.hpp"
 #include "IL2CPPResolver/Unity/API/Component.hpp"
@@ -12,13 +13,16 @@
 #include "IL2CPPResolver/Unity/Structures/Engine.hpp"
 #include "IL2CPPResolver/Unity/Structures/System_String.hpp"
 #include "IL2CPPResolver/Unity/Structures/il2cpp.hpp"
+#include "IL2CPPResolver/Unity/Structures/il2cppArray.hpp"
 #include "draw/gui/window/WindowManager.hpp"
 #include "imgui.h"
 #include "log/log.hpp"
 #include "spdlog/fmt/bundled/format.h"
 #include "u3d/sdk/Actor/Player/LocalPlayer.hpp"
 #include "u3d/sdk/Actor/Player/Player.hpp"
+#include "u3d/sdk/PlayerUpdate.hpp"
 #include <string>
+#include <vector>
 
 namespace zr {
 DebugWindow *DebugWindow::GetInstance() {
@@ -191,6 +195,18 @@ void DebugWindow::OnRender() {
       }
     }
     ImGui::TreePop();
+  }
+  if (ImGui::Button("Crasher Server")) {
+    playerUpdateCallbacks.append([](Player *player) {
+      auto clazz = player->getPlayerClass();
+      if (clazz) {
+        std::vector<Unity::il2cppObject *> args1(0);
+        for (int i = 0; i < 30; i++) {
+          clazz->sendToServer("Update", args1);
+          clazz->sendToServer("Init", args1);
+        }
+      }
+    });
   }
   if (ImGui::TreeNode("Class List")) {
     // 全局过滤输入框
